@@ -88,12 +88,8 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.github.classgraph</groupId>
-            <artifactId>classgraph</artifactId>
-            <version>4.8.90</version> <!-- exemple d’une version corrigée -->
-        </dependency>
 
+        <!--    ajouter dependence de dotenv our lire automatiquement le fichier .env-->
     </dependencies>
 
     <build>
