@@ -1,4 +1,4 @@
-package com.smartlogi.sdms.domain.model;
+package com.smartlogi.sdms.domain.model.vo;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
