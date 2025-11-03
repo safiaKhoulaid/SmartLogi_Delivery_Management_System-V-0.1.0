@@ -31,9 +31,12 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         
-        // Skip JWT validation for public auth endpoints
+        // Skip JWT validation for public auth endpoints (matches SecurityConfiguration pattern)
         String path = request.getServletPath();
-        if (path.startsWith("/v1/auth/")) {
+        if (path.startsWith("/v1/auth/") || 
+            path.startsWith("/swagger-ui/") || 
+            path.startsWith("/v3/api-docs/") ||
+            path.startsWith("/actuator/")) {
             filterChain.doFilter(request, response);
             return;
         }

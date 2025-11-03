@@ -26,10 +26,9 @@
             </column>
             <column name="role" type="varchar(50)"/>
             <!-- Adresse embeddable -->
+            <column name="street_number" type="varchar(255)"/>
             <column name="street" type="varchar(255)"/>
-            <column name="street2" type="varchar(255)"/>
             <column name="city" type="varchar(255)"/>
-            <column name="state" type="varchar(255)"/>
             <column name="postal_code" type="varchar(20)"/>
             <column name="country" type="varchar(100)"/>
             <!-- Telephone embeddable -->
@@ -41,9 +40,14 @@
     <changeSet id="2" author="admin">
         <createTable tableName="client">
             <column name="id" type="varchar(255)">
-                <constraints primaryKey="true" nullable="false" foreignKeyName="fk_client_base_user" references="base_user(id)"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="client" 
+                                 baseColumnNames="id" 
+                                 constraintName="fk_client_base_user" 
+                                 referencedTableName="base_user" 
+                                 referencedColumnNames="id"/>
     </changeSet>
 
 </databaseChangeLog>

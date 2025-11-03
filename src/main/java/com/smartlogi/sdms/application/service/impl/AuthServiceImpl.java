@@ -25,7 +25,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest request) {
         // Check if user already exists
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+            throw new com.smartlogi.sdms.domain.exception.UserAlreadyExistsException("Email already registered");
         }
 
         // Create new user (default to Client type)
