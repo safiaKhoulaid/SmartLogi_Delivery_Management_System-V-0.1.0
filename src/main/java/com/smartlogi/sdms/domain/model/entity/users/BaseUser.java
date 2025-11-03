@@ -46,9 +46,20 @@ public abstract class BaseUser implements UserDetails {
     private String role;
 
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "numero", column = @Column(name = "street")),
+        @AttributeOverride(name = "rue", column = @Column(name = "street2")),
+        @AttributeOverride(name = "ville", column = @Column(name = "city")),
+        @AttributeOverride(name = "codePostal", column = @Column(name = "postal_code")),
+        @AttributeOverride(name = "pays", column = @Column(name = "country"))
+    })
     private Adresse adresse; // Pas besoin de @Column sur un @Embedded
 
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "codePays", column = @Column(name = "country_code")),
+        @AttributeOverride(name = "numero", column = @Column(name = "number"))
+    })
     private Telephone telephone; // Pas besoin de @Column sur un @Embedded
 
     @Override
