@@ -5,6 +5,12 @@ import com.smartlogi.sdms.domain.model.vo.Telephone;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "base_user") // nommer le table
@@ -18,7 +24,7 @@ import lombok.experimental.SuperBuilder;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "type_utilisateur", discriminatorType = DiscriminatorType.STRING)
 
-public abstract class BaseUser {
+public abstract class BaseUser implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -33,9 +39,45 @@ public abstract class BaseUser {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "role")
+    private String role;
+
     @Embedded
     private Adresse adresse; // Pas besoin de @Column sur un @Embedded
 
     @Embedded
     private Telephone telephone; // Pas besoin de @Column sur un @Embedded
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role != null ? role : "USER"));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
