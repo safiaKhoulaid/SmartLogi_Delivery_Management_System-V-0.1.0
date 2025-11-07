@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1762182186838-1" author="ycode">
+        <createTable tableName="base_user">
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_base_user"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="numero" type="VARCHAR(20)"/>
+            <column name="rue" type="VARCHAR(50)"/>
+            <column name="ville" type="VARCHAR(30)"/>
+            <column name="code_postal" type="VARCHAR(5)"/>
+            <column name="pays" type="VARCHAR(20)"/>
+            <column name="telephone_code_pays" type="VARCHAR(255)"/>
+            <column name="telephone_numero" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1762182186838-2" author="ycode">
+        <createTable tableName="client_expediteur">
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_client_expediteur"/>
+            </column>
+            <column name="code_client" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1762182186838-3" author="ycode">
+        <createTable tableName="colis">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_colis"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="poids" type="DOUBLE"/>
+            <column name="ville_destination" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_creation" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="statut" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priorite" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_expediteur_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="destinataire_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="livreur_id" type="VARCHAR(255)"/>
+            <column name="zone_destination_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1762182186838-4" author="ycode">
+        <createTable tableName="destinataire">
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_destinataire"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1762182186838-5" author="ycode">
+        <createTable tableName="historique_livraison">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_historique_livraison"/>
+            </column>
+            <column name="nouveau_statut" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_changement" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="commentaire" type="VARCHAR(500)"/>
+            <column name="colis_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1762182186838-6" author="ycode">
+        <createTable tableName="livreur">
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_livreur"/>
+            </column>
+            <column name="status_livreur" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="zone_assignee_id" type="VARCHAR(255)"/>
+            <column name="type_vehicule" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="matricule" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1762182186838-7" author="ycode">
+        <createTable tableName="zone">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_zone"/>
+            </column>
+            <column name="nom" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code_postal" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1762182186838-8" author="ycode">
+        <addUniqueConstraint columnNames="email" constraintName="uc_base_user_email" tableName="base_user"/>
+    </changeSet>
+    <changeSet id="1762182186838-9" author="ycode">
+        <addUniqueConstraint columnNames="password" constraintName="uc_base_user_password" tableName="base_user"/>
+    </changeSet>
+    <changeSet id="1762182186838-10" author="ycode">
+        <addUniqueConstraint columnNames="code_client" constraintName="uc_client_expediteur_codeclient"
+                             tableName="client_expediteur"/>
+    </changeSet>
+    <changeSet id="1762182186838-11" author="ycode">
+        <addUniqueConstraint columnNames="matricule" constraintName="uc_livreur_matricule" tableName="livreur"/>
+    </changeSet>
+    <changeSet id="1762182186838-12" author="ycode">
+        <addUniqueConstraint columnNames="nom" constraintName="uc_zone_nom" tableName="zone"/>
+    </changeSet>
+    <changeSet id="1762182186838-13" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="client_expediteur"
+                                 constraintName="FK_CLIENT_EXPEDITEUR_ON_USER" referencedColumnNames="user_id"
+                                 referencedTableName="base_user"/>
+    </changeSet>
+    <changeSet id="1762182186838-14" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="client_expediteur_id" baseTableName="colis"
+                                 constraintName="FK_COLIS_ON_CLIENT_EXPEDITEUR" referencedColumnNames="user_id"
+                                 referencedTableName="client_expediteur"/>
+    </changeSet>
+    <changeSet id="1762182186838-15" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="destinataire_id" baseTableName="colis"
+                                 constraintName="FK_COLIS_ON_DESTINATAIRE" referencedColumnNames="user_id"
+                                 referencedTableName="destinataire"/>
+    </changeSet>
+    <changeSet id="1762182186838-16" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="livreur_id" baseTableName="colis" constraintName="FK_COLIS_ON_LIVREUR"
+                                 referencedColumnNames="user_id" referencedTableName="livreur"/>
+    </changeSet>
+    <changeSet id="1762182186838-17" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="zone_destination_id" baseTableName="colis"
+                                 constraintName="FK_COLIS_ON_ZONE_DESTINATION" referencedColumnNames="id"
+                                 referencedTableName="zone"/>
+    </changeSet>
+    <changeSet id="1762182186838-18" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="destinataire"
+                                 constraintName="FK_DESTINATAIRE_ON_USER" referencedColumnNames="user_id"
+                                 referencedTableName="base_user"/>
+    </changeSet>
+    <changeSet id="1762182186838-19" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="colis_id" baseTableName="historique_livraison"
+                                 constraintName="FK_HISTORIQUE_LIVRAISON_ON_COLIS" referencedColumnNames="id"
+                                 referencedTableName="colis"/>
+    </changeSet>
+    <changeSet id="1762182186838-20" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="livreur" constraintName="FK_LIVREUR_ON_USER"
+                                 referencedColumnNames="user_id" referencedTableName="base_user"/>
+    </changeSet>
+    <changeSet id="1762182186838-21" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="zone_assignee_id" baseTableName="livreur"
+                                 constraintName="FK_LIVREUR_ON_ZONE_ASSIGNEE" referencedColumnNames="id"
+                                 referencedTableName="zone"/>
+    </changeSet>
+
+</databaseChangeLog>
