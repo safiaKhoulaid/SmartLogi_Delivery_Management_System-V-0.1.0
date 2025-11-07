@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1762338161512-2" author="ycode">
+        <createTable tableName="missions">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_missions"/>
+            </column>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="statut" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="adresse" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_prevue" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_effective" type="DATETIME"/>
+            <column name="commentaire" type="VARCHAR(500)"/>
+            <column name="livreur_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="colis_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1762338161512-3" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="colis_id" baseTableName="missions"
+                                 constraintName="FK_MISSIONS_ON_COLIS" referencedColumnNames="id"
+                                 referencedTableName="colis"/>
+    </changeSet>
+    <changeSet id="1762338161512-4" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="livreur_id" baseTableName="missions"
+                                 constraintName="FK_MISSIONS_ON_LIVREUR" referencedColumnNames="user_id"
+                                 referencedTableName="livreur"/>
+    </changeSet>
+    <changeSet id="1762338161512-6" author="ycode">
+        <dropColumn columnName="est_disponible" tableName="livreur"/>
+
+        <dropColumn columnName="type_mission" tableName="livreur"/>
+    </changeSet>
+    <changeSet id="1762338161512-1" author="ycode">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="nouveau_statut"
+                               tableName="historique_livraison"/>
+    </changeSet>
+
+</databaseChangeLog>
