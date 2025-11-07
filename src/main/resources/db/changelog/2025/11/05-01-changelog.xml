@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1762330629356-9" author="ycode">
+        <dropForeignKeyConstraint baseTableName="colis" constraintName="fk_colis_on_livreur"/>
+    </changeSet>
+    <changeSet id="1762330629356-3" author="ycode">
+        <addColumn tableName="livreur">
+            <column name="est_disponible" type="BOOLEAN"/>
+            <column name="type_mission" type="SMALLINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1762330629356-4" author="ycode">
+        <addColumn tableName="colis">
+            <column name="livreur_collecte_id" type="VARCHAR(255)"/>
+            <column name="livreur_livraison_id" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1762330629356-7" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="livreur_collecte_id" baseTableName="colis"
+                                 constraintName="FK_COLIS_ON_LIVREUR_COLLECTE" referencedColumnNames="user_id"
+                                 referencedTableName="livreur"/>
+    </changeSet>
+    <changeSet id="1762330629356-8" author="ycode">
+        <addForeignKeyConstraint baseColumnNames="livreur_livraison_id" baseTableName="colis"
+                                 constraintName="FK_COLIS_ON_LIVREUR_LIVRAISON" referencedColumnNames="user_id"
+                                 referencedTableName="livreur"/>
+    </changeSet>
+    <changeSet id="1762330629356-11" author="ycode">
+        <dropColumn columnName="livreur_id" tableName="colis"/>
+
+        <dropColumn columnName="poids" tableName="colis"/>
+    </changeSet>
+    <changeSet id="1762330629356-1" author="ycode">
+        <modifyDataType columnName="colis_id" newDataType="VARCHAR(255)" tableName="historique_livraison"/>
+    </changeSet>
+    <changeSet id="1762330629356-2" author="ycode">
+        <modifyDataType columnName="id" newDataType="VARCHAR(255)" tableName="colis"/>
+    </changeSet>
+
+</databaseChangeLog>
