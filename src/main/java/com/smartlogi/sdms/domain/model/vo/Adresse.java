@@ -4,17 +4,11 @@ import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+
 import java.util.Objects;
 
-/**
- * Value Object représentant une adresse complète et immuable.
- *
- * Utilisation : Il est destiné à être embarqué (@Embeddable) dans les Entités JPA
- * comme ClientExpediteur, Destinataire ou potentiellement Colis pour définir
- * le lieu de résidence ou de destination.
- *
- * L'égalité est basée sur la valeur de tous ses composants (grâce au record).
- */
+
 @Embeddable
 public record Adresse(
 
