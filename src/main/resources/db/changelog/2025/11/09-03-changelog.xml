@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1762646509238-1" author="ycode">
+        <addColumn tableName="zone">
+            <column name="depot_latitude" type="DOUBLE"/>
+            <column name="depot_longitude" type="DOUBLE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1762646509238-3" author="ycode">
+        <addColumn tableName="base_user">
+            <column name="latitude" type="DOUBLE"/>
+            <column name="longitude" type="DOUBLE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="1762646509238-4" author="ycode">
+        <addColumn tableName="missions">
+            <column name="latitude" type="DOUBLE"/>
+            <column name="longitude" type="DOUBLE"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
