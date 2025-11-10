@@ -1,6 +1,7 @@
 package com.smartlogi.sdms.domain.model.vo;
 
 import com.smartlogi.sdms.domain.model.enums.UnitePoids;
+import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
@@ -11,6 +12,7 @@ import java.util.Objects;
  * Value Object représentant le poids d'un colis ou d'un produit.
  * Immuable et toujours positif.
  */
+@Embeddable
 public record Poids(
 
         @NotNull(message = "Le poids ne peut pas être nul")

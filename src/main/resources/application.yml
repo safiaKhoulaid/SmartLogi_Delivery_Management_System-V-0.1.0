@@ -22,7 +22,7 @@ spring:
       name: admin
       password: 1234
 
-  mail:                      # <== ici, directement sous spring
+  mail:
     host: smtp.gmail.com
     port: 587
     username: safiakhoulaid11@gmail.com
@@ -50,3 +50,13 @@ management:
   metrics:
     tags:
       application: my-spring-app
+
+# ===== Configuration Swagger / Springdoc =====
+springdoc:
+  api-docs:
+    path: /v1/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    defaultModelsExpandDepth: 1
+    displayRequestDuration: true

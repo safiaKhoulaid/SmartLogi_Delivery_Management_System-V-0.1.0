@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${subject}">Email Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+        .content {
+            line-height: 1.5;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #888888;
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <h2 th:text="${title}">Titre Email</h2>
+        <img th:if="${logoUrl}" th:src="${logoUrl}" alt="Logo" width="100">
+    </div>
+
+    <!-- Content principal -->
+    <div class="content">
+        <p th:if="${greeting}" th:text="${greeting}">Bonjour !</p>
+
+        <!-- Message principal -->
+        <p th:if="${message}" th:text="${message}">Ceci est le message principal de l'email.</p>
+
+        <!-- Liste dynamique -->
+        <ul th:if="${items != null}">
+            <li th:each="item : ${items}" th:text="${item}">Item</li>
+        </ul>
+
+        <!-- Bouton action -->
+        <p th:if="${actionUrl}">
+            <a th:href="${actionUrl}" class="btn" th:text="${actionText}">Cliquez ici</a>
+        </p>
+
+        <!-- Condition dynamique -->
+        <p th:if="${showExtraInfo}" th:text="${extraInfo}">Informations supplémentaires ici.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p th:text="${footerText}">Vous recevez cet email car vous êtes inscrit à notre service.</p>
+        <p>&copy; <span th:text="${year}">2025</span> Mon Application</p>
+    </div>
+
+</div>
+</body>
+</html>

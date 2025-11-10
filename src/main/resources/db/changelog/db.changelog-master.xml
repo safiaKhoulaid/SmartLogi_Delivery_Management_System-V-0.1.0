@@ -4,7 +4,26 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="0" author="admin">
 
-    </changeSet>
+    <include file="db/changelog/2025/11/03-01-changelog.xml"/>
+    <include file="db/changelog/2025/11/03-02-changelog.xml"/>
+    <include file="db/changelog/2025/11/04-01-changelog.xml"/>
+    <include file="db/changelog/2025/11/04-02-changelog.xml"/>
+    <include file="db/changelog/2025/11/04-03-changelog.xml"/>
+    <include file="db/changelog/2025/11/04-04-changelog.xml"/>
+    <include file="db/changelog/2025/11/04-05-changelog.xml"/>
+    <include file="db/changelog/2025/11/05-01-changelog.xml"/>
+    <include file="db/changelog/2025/11/05-02-changelog.xml"/>
+    <include file="db/changelog/2025/11/05-03-changelog.xml"/>
+    <include file="db/changelog/2025/11/06-01-changelog.xml"/>
+    <include file="db/changelog/2025/11/06-02-changelog.xml"/>
+    <include file="db/changelog/2025/11/06-03-changelog.xml"/>
+    <include file="db/changelog/2025/11/06-04-changelog.xml"/>
+    <include file="db/changelog/2025/11/07-01-changelog.xml"/>
+    <include file="db/changelog/2025/11/09-01-changelog.xml"/>
+    <include file="db/changelog/2025/11/09-02-changelog.xml"/>
+    <include file="db/changelog/2025/11/09-03-changelog.xml"/>
+    <include file="db/changelog/2025/11/09-04-changelog.xml"/>
+    <include file="db/changelog/2025/11/09-05-changelog.xml"/>
+
 </databaseChangeLog>

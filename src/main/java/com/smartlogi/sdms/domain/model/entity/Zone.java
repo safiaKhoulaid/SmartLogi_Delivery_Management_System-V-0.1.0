@@ -1,6 +1,7 @@
 package com.smartlogi.sdms.domain.model.entity;
 
 import com.smartlogi.sdms.domain.model.entity.users.Livreur;
+import com.smartlogi.sdms.domain.model.vo.Adresse; // <-- 1. IMPORT NECESSAIRE
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -8,41 +9,55 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.List;
 import java.util.Objects;
 
-@Entity
-@Table(name = "zone")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Getter
 @Setter
-@RequiredArgsConstructor // Inclut @Getter, @Setter, @ToString, @EqualsAndHashCode
-@Builder // Permet la création d'instances de manière sécurisée
-@NoArgsConstructor // Requis par JPA et Builder
-@AllArgsConstructor // Requis par Builder
 @ToString
+@Entity
+@Table(name = "zone") // "zone" est souvent un mot-clé, "zones" est plus sûr
 public class Zone {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id; // Utilisation de Long pour les IDs séquentiels/auto-incrémentés
+    private String id; // Gardé en String (UUID)
 
     @Column(name = "nom", unique = true)
     private String nom; // Nom de la zone (ex : 'Rabat Centre', 'Casablanca Sud')
-
 
     @Column(name = "ville")
     String ville;
 
     @Column(name = "code_postal")
-    private String codePostal; // Un code postal ou une plage de codes postaux associés à cette zone
+    private String codePostal;
+
+    // ⬇️ --- AJOUT REQUIS --- ⬇️
+    // Adresse du dépôt/entrepôt qui gère cette zone.
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "rue", column = @Column(name = "depot_rue")), // (Vérifiez si "depot_numero" et les autres sont corrects)
+            @AttributeOverride(name = "ville", column = @Column(name = "depot_ville")),
+            @AttributeOverride(name = "codePostal", column = @Column(name = "depot_code_postal")),
+            @AttributeOverride(name = "pays", column = @Column(name = "depot_pays")),
+            // ... (assurez-vous que depot_numero est aussi mappé si vous l'avez)
+
+            @AttributeOverride(name = "latitude", column = @Column(name = "depot_attitide")), // <-- CORRIGÉ (selon votre typo)
+            @AttributeOverride(name = "longitude", column = @Column(name = "depotlangtitude")) // <-- CORRIGÉ (selon votre typo)
+    })
+    private Adresse adresseDepot;
+
+    // ⬆️ --- FIN DE L'AJOUT --- ⬆️
+
 
     // --- Relations (One-to-Many) ---
 
-    // 1. Les Livreuers assignés à cette Zone
-    // La zone est la source d'information sur les livreurs qui y travaillent.
-    @OneToMany(mappedBy = "zoneAssignee", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "zoneAssignee", fetch = FetchType.LAZY) // <-- Corrigé en LAZY
+    @ToString.Exclude // <-- Ajouté pour éviter les boucles
     private List<Livreur> livreurs;
 
-    // 2. Les Colis qui ont cette Zone comme destination
-    // Ceci est crucial pour le regroupement et la planification des livraisons par zone.
-    @OneToMany(mappedBy = "zoneDestination", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "zoneDestination", fetch = FetchType.LAZY) // <-- Corrigé en LAZY
+    @ToString.Exclude // <-- Ajouté pour éviter les boucles
     private List<Colis> colis;
 
     @Override
