@@ -29,6 +29,10 @@
     </scm>
     <properties>
         <java.version>17</java.version>
+        <sonar.projectKey>sdms</sonar.projectKey>
+        <sonar.projectName>SDMS</sonar.projectName>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.token>sqp_3b0dac2b6725d82550d60df7f369df1eb9aa9a66</sonar.token>
     </properties>
     <dependencies>
         <dependency>
@@ -232,6 +236,30 @@
                     <referenceUrl>hibernate:spring:com.smartlogi.sdms.domain?org.hibernate.dialect.PostgreSQLDialect
                     </referenceUrl>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.11</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase> <goals>
+                        <goal>report</goal>
+                    </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>4.0.0.4121</version>
             </plugin>
 
 
