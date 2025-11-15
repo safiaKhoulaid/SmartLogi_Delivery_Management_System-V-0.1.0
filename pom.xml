@@ -34,6 +34,7 @@
         <sonar.host.url>http://localhost:9000</sonar.host.url>
         <sonar.token>sqp_3b0dac2b6725d82550d60df7f369df1eb9aa9a66</sonar.token>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -170,26 +171,38 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
 
 
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <configuration>
-                            <mainClass>com.smartlogi.sdms.SmartLogiApplication</mainClass>
-                            <excludes>
-                                <exclude>
-                                    <groupId>org.projectlombok</groupId>
-                                    <artifactId>lombok</artifactId>
-                                </exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.smartlogi.sdms.SmartLogiApplication</mainClass>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
 
 
             <plugin>
@@ -213,7 +226,8 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>0.2.0</version> </path>
+                            <version>0.2.0</version>
+                        </path>
                     </annotationProcessorPaths>
                     <compilerArgs>
                         <arg>-Amapstruct.defaultComponentModel=spring</arg>
@@ -241,6 +255,23 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
+                <configuration>
+                    <excludes>
+                        <exclude>com/smartlogi/sdms/SmartLogiApplication.class</exclude>
+
+                        <exclude>com/smartlogi/sdms/infrastructure/configuration/*</exclude>
+
+                        <exclude>com/smartlogi/sdms/infrastructure/handler/*</exclude>
+
+                        <exclude>com/smartlogi/sdms/application/dto/**</exclude>
+
+                        <exclude>com/smartlogi/sdms/domain/model/entity/**</exclude>
+
+                        <exclude>com/smartlogi/sdms/domain/model/enums/*</exclude>
+
+                        <exclude>com/smartlogi/sdms/domain/exception/*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -250,11 +281,13 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>verify</phase> <goals>
-                        <goal>report</goal>
-                    </goals>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
                     </execution>
                 </executions>
+
             </plugin>
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
