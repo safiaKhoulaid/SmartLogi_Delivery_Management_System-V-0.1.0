@@ -5,6 +5,18 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <!--
+      CHANGESETS SUPPRIMÉS :
+      - 1762330629356-0 (drop FK)
+      - 1762330629356-1 (modify historique_livraison.colis_id)
+      - 1762330629356-2 (modify colis.id)
+      - 1762330629356-2.5 (add FK)
+      Ils sont inutiles car le type est maintenant correct dès le début.
+    -->
+
+    <!-- Le reste de votre fichier (les autres modifications sont ok) -->
+
     <changeSet id="1762330629356-9" author="ycode">
         <dropForeignKeyConstraint baseTableName="colis" constraintName="fk_colis_on_livreur"/>
     </changeSet>
@@ -32,14 +44,7 @@
     </changeSet>
     <changeSet id="1762330629356-11" author="ycode">
         <dropColumn columnName="livreur_id" tableName="colis"/>
-
         <dropColumn columnName="poids" tableName="colis"/>
-    </changeSet>
-    <changeSet id="1762330629356-1" author="ycode">
-        <modifyDataType columnName="colis_id" newDataType="VARCHAR(255)" tableName="historique_livraison"/>
-    </changeSet>
-    <changeSet id="1762330629356-2" author="ycode">
-        <modifyDataType columnName="id" newDataType="VARCHAR(255)" tableName="colis"/>
     </changeSet>
 
 </databaseChangeLog>
