@@ -42,9 +42,10 @@ public class BaseUserService {
         // 3. Sauvegarde de l'entité
         return destinataireRepository.save(destinataire);
     }
+
     /**
      * Recherche un ClientExpediteur par son ID.
-     * NOTE: L'ID est supposé être de type Long (bigint en base).
+     * NOTE : L'ID est supposé être de type Long (bigint en base).
      * @param expediteurId L'ID du ClientExpediteur.
      * @return Un Optional contenant le ClientExpediteur s'il est trouvé.
      */
@@ -52,5 +53,9 @@ public class BaseUserService {
 
         // Utilise le repository spécifique pour ClientExpediteur.
         return clientExpediteurRepository.findById(expediteurId);
+
     }
+
+
+
 }
