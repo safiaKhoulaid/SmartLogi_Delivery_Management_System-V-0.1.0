@@ -33,11 +33,11 @@ public interface ColisMapper {
     // MapStruct utilisera map(Adresse adresse)
     @Mapping(source = "livreurCollecte.id", target = "livreurCollecteId")
     @Mapping(source = "livreurCollecte.firstName", target = "livreurCollecteNom")
-
+    @Mapping(source = "clientExpediteur", target = "clientExpediteurNom", qualifiedByName = "mapNomComplet")
     // Les champs complexes (dernier statut) sont ignorés
     @Mapping(target = "dernierStatutCommentaire", ignore = true)
     @Mapping(target = "dateDernierStatut", ignore = true)
-    ColisResponseDTO toColisResponseDTO(Colis colis);
+    public ColisResponseDTO toColisResponseDTO(Colis colis);
 
 
     // =================================================================
@@ -101,4 +101,5 @@ public interface ColisMapper {
         }
         return adresse.getAdresseComplete();
     }
+
 }
