@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 public class AuthentificationService {
 
     private final PasswordEncoder passwordEncoder;
-    private final BaseUserRepository baseUserRepository; // AJOUT de final
-    private final AuthenticationManager authenticationManager; // AJOUT de final
-    private final JWTService jwtService; // AJOUT de final
+    private final BaseUserRepository baseUserRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtService;
 
     public AuthentificationResponse register(UserRequestRegisterDTO request) {
         BaseUser user =
@@ -32,8 +32,15 @@ public class AuthentificationService {
                         .telephone(request.getTelephone())
                         .role(request.getRole())
                         .build();
-        baseUserRepository.save(user);
-        String jwt = jwtService.generateToken(user);
+
+        // --- CORRECTION ---
+        // 1. Récupérez l'entité sauvegardée (qui aura un ID)
+        BaseUser savedUser = baseUserRepository.save(user);
+
+        // 2. Passez l'entité sauvegardée au service JWT
+        String jwt = jwtService.generateToken(savedUser);
+        // --- FIN CORRECTION ---
+
         return AuthentificationResponse.builder()
                 .token(jwt)
                 .build();
