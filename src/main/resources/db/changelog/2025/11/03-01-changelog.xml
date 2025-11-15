@@ -10,6 +10,7 @@
             <column name="user_id" type="VARCHAR(255)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_base_user"/>
             </column>
+            <!-- ... (les autres colonnes de base_user sont correctes) ... -->
             <column name="first_name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -44,9 +45,16 @@
             </column>
         </createTable>
     </changeSet>
+
+    <!-- === CORRECTION APPLIQUÉE ICI === -->
     <changeSet id="1762182186838-3" author="ycode">
         <createTable tableName="colis">
-            <column autoIncrement="true" name="id" type="BIGINT">
+            <!--
+              CORRECTION:
+              Type changé de BIGINT à VARCHAR(255).
+              autoIncrement="true" supprimé (car c'est un UUID).
+            -->
+            <column name="id" type="VARCHAR(255)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_colis"/>
             </column>
             <column name="description" type="VARCHAR(255)"/>
@@ -75,6 +83,8 @@
             </column>
         </createTable>
     </changeSet>
+    <!-- === FIN DE LA CORRECTION === -->
+
     <changeSet id="1762182186838-4" author="ycode">
         <createTable tableName="destinataire">
             <column name="user_id" type="VARCHAR(255)">
@@ -82,6 +92,8 @@
             </column>
         </createTable>
     </changeSet>
+
+    <!-- === CORRECTION APPLIQUÉE ICI === -->
     <changeSet id="1762182186838-5" author="ycode">
         <createTable tableName="historique_livraison">
             <column name="id" type="VARCHAR(255)">
@@ -94,11 +106,17 @@
                 <constraints nullable="false"/>
             </column>
             <column name="commentaire" type="VARCHAR(500)"/>
-            <column name="colis_id" type="BIGINT">
+            <!--
+              CORRECTION:
+              Type changé de BIGINT à VARCHAR(255) pour correspondre à colis.id.
+            -->
+            <column name="colis_id" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
+    <!-- === FIN DE LA CORRECTION === -->
+
     <changeSet id="1762182186838-6" author="ycode">
         <createTable tableName="livreur">
             <column name="user_id" type="VARCHAR(255)">
@@ -127,6 +145,8 @@
             <column name="code_postal" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
+
+    <!-- (Le reste des contraintes est OK) -->
     <changeSet id="1762182186838-8" author="ycode">
         <addUniqueConstraint columnNames="email" constraintName="uc_base_user_email" tableName="base_user"/>
     </changeSet>
@@ -186,5 +206,4 @@
                                  constraintName="FK_LIVREUR_ON_ZONE_ASSIGNEE" referencedColumnNames="id"
                                  referencedTableName="zone"/>
     </changeSet>
-
 </databaseChangeLog>
