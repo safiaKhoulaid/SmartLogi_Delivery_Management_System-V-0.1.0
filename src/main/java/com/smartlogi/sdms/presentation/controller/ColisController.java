@@ -5,6 +5,8 @@ import com.smartlogi.sdms.application.dto.colis.ColisResponseDTO;
 import com.smartlogi.sdms.application.mapper.ColisMapper;
 import com.smartlogi.sdms.application.service.ColisService;
 import com.smartlogi.sdms.domain.model.entity.Colis;
+import com.smartlogi.sdms.domain.model.enums.PriorityColis;
+import com.smartlogi.sdms.domain.model.enums.StatusColis;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j; // 👈 AJOUT
 import org.springframework.data.domain.Page;
@@ -72,5 +74,18 @@ public class ColisController {
         colisService.deleteColis(id);
         log.info("Colis ID: {} supprimé.", id); // 👈 AJOUT
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ColisResponseDTO>> search(
+            @RequestParam(required = false) StatusColis statut,
+            @RequestParam(required = false) PriorityColis priorite,
+            @RequestParam(required = false) String ville,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String expediteurId,
+            @PageableDefault(size = 10, sort = "dateCreation", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<ColisResponseDTO> result = colisService.searchColisSimple(statut, priorite, ville, description, expediteurId, pageable);
+        return ResponseEntity.ok(result);
     }
 }

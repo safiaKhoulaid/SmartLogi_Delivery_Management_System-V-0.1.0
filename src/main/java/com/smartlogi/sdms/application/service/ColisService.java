@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -214,4 +215,32 @@ public class ColisService {
         colisRepository.deleteById(colisId);
         log.info("Colis ID: {} et missions associées supprimés avec succès.", colisId);
     }
+
+    @Transactional
+    public Page<ColisResponseDTO> searchColisSimple(
+            StatusColis statut,
+            PriorityColis priorite,
+            String ville,
+            String description,
+            String expediteurId,
+            Pageable pageable) {
+
+        Page<Colis> page = colisRepository.rechercheAvancee(statut, priorite, ville, description, expediteurId, pageable);
+        return page.map(colisMapper::toColisResponseDTO);
+}
+
+public List<ColisResponseDTO> updateAllColisByLivreur (String idLivreur ){
+        List<Colis> colisTemp = colisRepository.findAllByLivreurId(idLivreur);
+        for(Colis colis : colisTemp){
+            colis.setStatut(StatusColis.CREE);
+            colisRepository.save(colis);
+        }
+        return colisTemp.stream().map(colisMapper::toColisResponseDTO).toList();
+
+
+
+}
+
+
+
 }

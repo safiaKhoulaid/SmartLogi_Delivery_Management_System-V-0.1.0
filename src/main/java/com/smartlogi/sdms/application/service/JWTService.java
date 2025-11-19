@@ -2,6 +2,10 @@ package com.smartlogi.sdms.application.service;
 
 
 import io.jsonwebtoken.Claims;
+// --- AJOUTS IMPORTS ---
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+// --- FIN AJOUTS ---
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -20,13 +24,10 @@ public class JWTService {
 
 
     public String extractUserEmail(String jwt) {
-
         return extractClaim(jwt, Claims::getSubject);
     }
 
-    // Implémentation fictive pour l'extraction du nom d'utilisateur à partir du token JWT
-
-
+    // ... (generateToken methods are fine) ...
     public String generateToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails
@@ -36,16 +37,14 @@ public class JWTService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24*1200))
                 .signWith(SignatureAlgorithm.HS256, getSignInKey())
                 .compact();
     }
-
-
-
     public String generateToken(UserDetails userDetails) {
-      return   generateToken(new HashMap<>() , userDetails);
+        return   generateToken(new HashMap<>() , userDetails);
     }
+    // ...
 
     private Date extractExpiration(String jwt) {
         return extractClaim(jwt, Claims::getExpiration);
@@ -56,13 +55,32 @@ public class JWTService {
         return claimsResolver.apply(claims);
     }
 
+    // --- CORRECTION 1 ---
     public boolean isTokenExpired(String jwt) {
-        return extractExpiration(jwt).before(new Date());
+        try {
+            return extractExpiration(jwt).before(new Date());
+        } catch (ExpiredJwtException e) {
+            // Si le parser lève cette exception, c'est que le token EST expiré.
+            return true;
+        }
     }
 
+    // --- CORRECTION 2 ---
     public boolean isTokenValid(String jwt, UserDetails userDetails) {
-        final String userEmail = extractUserEmail(jwt);
-        return (userEmail.equals(userDetails.getUsername())) && !isTokenExpired(jwt);
+        try {
+            final String userEmail = extractUserEmail(jwt);
+            // Si extractUserEmail réussit (c-à-d n'a pas levé ExpiredJwtException),
+            // nous savons que le token n'est pas expiré.
+            // Il suffit donc de vérifier le nom d'utilisateur.
+            return (userEmail.equals(userDetails.getUsername()));
+
+        } catch (ExpiredJwtException e) {
+            // Le token est expiré
+            return false;
+        } catch (JwtException e) {
+            // Le token est malformé, a une signature invalide, etc.
+            return false;
+        }
     }
 
     public Claims extractClaims(String jwt) {
@@ -71,7 +89,7 @@ public class JWTService {
                 // Utilise la clé Key décodée
                 .setSigningKey(getSignInKey())
                 .build()
-                .parseClaimsJws(jwt)
+                .parseClaimsJws(jwt) // C'est cette ligne qui lève l'exception
                 .getBody();
     }
 

@@ -4,12 +4,14 @@ import com.smartlogi.sdms.application.dto.colis.ColisResponseDTO;
 import com.smartlogi.sdms.domain.model.enums.StatutTournee;
 import jakarta.transaction.Transactional;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
-@Transactional
+@Setter
+@Getter
 public class TourneeResponseDTO {
     private Long id;
     private LocalDate dateTournee;

@@ -9,9 +9,9 @@ import java.util.regex.Pattern;
 public class EmailValidator
         implements ConstraintValidator<EmailValid, String> {
 
-    private Pattern pattern;
-    private Matcher matcher;
-    private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$";
+    // --- CORRECTION : Regex remplacée par une version plus standard ---
+    private static final String EMAIL_PATTERN =
+            "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
     @Override
     public void initialize(EmailValid constraintAnnotation) {
@@ -23,8 +23,14 @@ public class EmailValidator
     }
 
     private boolean validateEmail(String email) {
-        pattern = Pattern.compile(EMAIL_PATTERN);
-        matcher = pattern.matcher(email);
+        // --- CORRECTION : Ajout d'une vérification de null ---
+        if (email == null) {
+            return false;
+        }
+        // --- FIN CORRECTION ---
+
+        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+        Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
 }

@@ -5,12 +5,10 @@ import com.smartlogi.sdms.application.dto.routes.OptimizedRouteResponse;
 import com.smartlogi.sdms.application.dto.routes.RouteRequest;
 import com.smartlogi.sdms.infrastructure.utils.Haversine;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal; // Gardé pour le DTO
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class RouteOptimizationService {
@@ -147,9 +145,8 @@ public class RouteOptimizationService {
         }
 
         // 2. Trier les économies par ordre décroissant
-        savings.sort(Comparator.comparingDouble(Saving::getAmount).reversed());
-
-        // 3. Initialiser les tournées
+// Dans la méthode solveClarkeWright:
+        savings.sort(Comparator.comparingDouble((Saving saving) -> saving.getAmount()).reversed());        // 3. Initialiser les tournées
         Map<LocationDTO, List<LocationDTO>> routesMap = new HashMap<>();
         for (LocationDTO loc : locations) {
             routesMap.put(loc, new ArrayList<>(List.of(loc)));
@@ -166,7 +163,7 @@ public class RouteOptimizationService {
             if (routeI != routeJ) {
                 // TODO: Ajouter la vérification de capacité en utilisant .doubleValue()
                 routeI.addAll(routeJ);
-                for(LocationDTO locInJ : routeJ) {
+                for (LocationDTO locInJ : routeJ) {
                     routesMap.put(locInJ, routeI);
                 }
             }
@@ -223,7 +220,7 @@ public class RouteOptimizationService {
     }
 
     // Classe interne pour l'algorithme Clarke-Wright
-    @Data
+    @Getter
     @AllArgsConstructor
     private static class Saving {
         private LocationDTO locI;

@@ -4,10 +4,13 @@ import com.smartlogi.sdms.domain.model.enums.MissionType;
 import com.smartlogi.sdms.domain.model.enums.StatutMission;
 import com.smartlogi.sdms.domain.model.vo.Adresse;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
+@Setter
+@Getter
 public class MissionResponseDTO {
 
     private String id; // UUID

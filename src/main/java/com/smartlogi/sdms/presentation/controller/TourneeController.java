@@ -6,11 +6,10 @@ import com.smartlogi.sdms.application.service.TourneeService;
 import com.smartlogi.sdms.domain.model.enums.StatutTournee;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/tournees")
@@ -19,9 +18,6 @@ public class TourneeController {
 
     private final TourneeService tourneeService;
 
-    /**
-     * Crée et optimise une nouvelle tournée.
-     */
     @PostMapping("/optimize")
     public ResponseEntity<TourneeResponseDTO> createAndOptimizeTournee(
             @Valid @RequestBody TourneeRequestDTO requestDTO) {
@@ -42,10 +38,15 @@ public class TourneeController {
      * Récupère toutes les tournées pour un livreur spécifique.
      */
     @GetMapping("/livreur/{livreurId}")
-    public ResponseEntity<List<TourneeResponseDTO>> getTourneesByLivreur(@PathVariable String livreurId) {
-        List<TourneeResponseDTO> response = tourneeService.getTourneesByLivreur(livreurId);
+    public ResponseEntity<Page<TourneeResponseDTO>> getTourneesByLivreur(
+            @PathVariable String livreurId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<TourneeResponseDTO> response = tourneeService.getTourneesByLivreur(livreurId, page, size);
         return ResponseEntity.ok(response);
     }
+
 
     /**
      * Met à jour le statut d'une tournée (ex: PLANIFIEE -> EN_COURS).

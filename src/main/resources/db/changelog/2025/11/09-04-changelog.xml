@@ -10,12 +10,7 @@
             <column name="capacite_maximale" type="DOUBLE"/>
         </addColumn>
     </changeSet>
-    <changeSet id="1762699625227-2" author="ycode">
-        <addColumn tableName="zone">
-            <column name="depot_attitide" type="DOUBLE"/>
-            <column name="depotlangtitude" type="DOUBLE"/>
-        </addColumn>
-    </changeSet>
+
     <changeSet id="1762699625227-5" author="ycode">
         <dropColumn columnName="depot_latitude" tableName="zone"/>
 
