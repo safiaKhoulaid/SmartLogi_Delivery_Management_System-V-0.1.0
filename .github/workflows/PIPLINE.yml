@@ -49,4 +49,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: safiakhoulaid11/smartlogi-backend:latest
+          tags: safiakhoulaid/smartlogi-backend:latest
