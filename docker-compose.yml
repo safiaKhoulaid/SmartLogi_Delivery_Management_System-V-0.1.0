@@ -2,12 +2,22 @@ version: "3.9"
 
 services:
   app:
-    build: .
+    # 🛑 1. Hna beddli 'smiytk' b username dyal Docker Hub dyalek
+    image: safiakhoulaid11@gmail.com/smartlogi-backend:latest
+
     container_name: spring-app
+
+    # 2. Mohim: Bach dima yjib l version jdida mn Docker Hub
+    pull_policy: always
+
+    # 3. Ila tfa container (crash), y-redemarrer rasso
+    restart: always
+
     ports:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      # Hna l'url khasso ybqa db-1 hit hwa smiyt service ta7t
       DATABASE_URL: jdbc:postgresql://db-1:5432/smartlogi_db_v2
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: 1234
@@ -17,12 +27,18 @@ services:
   db-1:
     image: postgres:15
     container_name: postgres-db
+    restart: always
     environment:
       POSTGRES_DB: smartlogi_db_v2
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
     ports:
       - "5432:5432"
+    # 4. Mohim: Volume bach Data matmchich ila tfa Server
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+
+
 
   prometheus:
     image: prom/prometheus:latest
