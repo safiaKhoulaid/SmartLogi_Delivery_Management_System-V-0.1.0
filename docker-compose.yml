@@ -3,7 +3,7 @@ version: "3.9"
 services:
   app:
     # 🛑 1. Hna beddli 'smiytk' b username dyal Docker Hub dyalek
-    image: safiakhoulaid11@gmail.com/smartlogi-backend:latest
+    image: safiakhoulaid11/smartlogi-backend:latest
 
     container_name: spring-app
 
