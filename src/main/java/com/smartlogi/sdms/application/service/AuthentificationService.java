@@ -1,11 +1,13 @@
 package com.smartlogi.sdms.application.service;
 
 
+import com.smartlogi.sdms.application.dto.auth.AuthentificationRequest;
+import com.smartlogi.sdms.application.dto.auth.AuthentificationResponse;
+import com.smartlogi.sdms.application.dto.auth.RegisterResponse;
 import com.smartlogi.sdms.application.dto.user.UserRequestRegisterDTO;
+import com.smartlogi.sdms.domain.exception.UserAlreadyExistsException;
 import com.smartlogi.sdms.domain.model.entity.users.BaseUser;
 import com.smartlogi.sdms.domain.repository.BaseUserRepository;
-import com.smartlogi.sdms.presentation.controller.auth.AuthentificationRequest;
-import com.smartlogi.sdms.presentation.controller.auth.AuthentificationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +23,12 @@ public class AuthentificationService {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
-    public AuthentificationResponse register(UserRequestRegisterDTO request) {
+    public RegisterResponse register(UserRequestRegisterDTO request) {
+        String email = request.getEmail();
+        if (baseUserRepository.existsByEmail(email)) {
+            throw new UserAlreadyExistsException("ce email déja utilise");
+        }
+
         BaseUser user =
                 BaseUser.builder()
                         .firstName(request.getPrenom())
@@ -41,8 +48,8 @@ public class AuthentificationService {
         String jwt = jwtService.generateToken(savedUser);
         // --- FIN CORRECTION ---
 
-        return AuthentificationResponse.builder()
-                .token(jwt)
+        return RegisterResponse.builder()
+                .message("Inscription réussie ! Veuillez vous connecter pour accéder à votre compte.")
                 .build();
     }
 
@@ -60,6 +67,9 @@ public class AuthentificationService {
         String jwt = jwtService.generateToken(user);
         return AuthentificationResponse.builder()
                 .token(jwt)
+                .massage("Vous étés connecte par succès !")
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .build();
 
     }

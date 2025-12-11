@@ -1,6 +1,7 @@
 package com.smartlogi.sdms.infrastructure.handler;
 
 import com.smartlogi.sdms.domain.exception.ResourceNotFoundException;
+import com.smartlogi.sdms.domain.exception.UserAlreadyExistsException;
 import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -73,4 +76,26 @@ public class GlobalExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Une erreur interne est survenue. Veuillez contacter le support.", request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR); // Renvoie 500
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(err ->
+                errors.put(err.getField(), err.getDefaultMessage())
+        );
+
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorDetails> handleUserAlreadyExists(UserAlreadyExistsException exception, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                LocalDateTime.now(),
+                exception.getMessage(),
+                request.getDescription(false)
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT); // 409
+    }
+
 }

@@ -43,6 +43,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -124,9 +125,10 @@ class TourneeServiceTest {
                 .build();
 
         // --- DTO de Réponse (final) ---
-        responseDTO = new TourneeResponseDTO();
-        responseDTO.setId(tourneeId);
-        responseDTO.setLivreurId(livreurId);
+        responseDTO = TourneeResponseDTO.builder()
+                .id(tourneeId)
+                .livreurId(livreurId)
+                .build();
     }
 
     // --- Tests pour createAndOptimizeTournee ---
@@ -146,7 +148,6 @@ class TourneeServiceTest {
         when(tourneeRepository.save(any(Tournee.class))).thenReturn(savedTournee);
 
         // Simule la recherche finale (après mise à jour des colis)
-        // (On réutilise 'savedTournee' pour simuler la tournée finale)
         when(tourneeRepository.findById(tourneeId)).thenReturn(Optional.of(savedTournee));
 
         when(tourneeMapper.toResponseDTO(savedTournee)).thenReturn(responseDTO);
@@ -174,7 +175,7 @@ class TourneeServiceTest {
     }
 
     @Test
-    @DisplayName("createAndOptimizeTournee devrait lever ResourceNotFound (Livreur)")
+    @DisplayName("createAndOptimizeTournee devrait lever ResourceNotFound (Livreur) (Couvre lambda 0)")
     void createAndOptimizeTournee_ShouldThrow_WhenLivreurNotFound() {
         // Arrange
         when(livreurRepository.findById(livreurId)).thenReturn(Optional.empty());
@@ -187,7 +188,7 @@ class TourneeServiceTest {
     }
 
     @Test
-    @DisplayName("createAndOptimizeTournee devrait lever ResourceNotFound (Zone)")
+    @DisplayName("createAndOptimizeTournee devrait lever ResourceNotFound (Zone) (Couvre lambda 1)")
     void createAndOptimizeTournee_ShouldThrow_WhenZoneNotFound() {
         // Arrange
         when(livreurRepository.findById(livreurId)).thenReturn(Optional.of(livreur));
@@ -230,7 +231,7 @@ class TourneeServiceTest {
         Exception e = assertThrows(IllegalStateException.class, () -> {
             tourneeService.createAndOptimizeTournee(requestDTO);
         });
-        assertTrue(e.getMessage().contains("n'a pas de coordonnées de dépôt configurées"));
+        assertTrue(e.getMessage().contains("n'a pas de coordonnées de dépôt configurées."));
     }
 
     @Test
@@ -253,10 +254,133 @@ class TourneeServiceTest {
         Exception e = assertThrows(IllegalStateException.class, () -> {
             tourneeService.createAndOptimizeTournee(requestDTO);
         });
-        assertTrue(e.getMessage().contains("n'a pas de coordonnées GPS (latitude/longitude) valides"));
+        assertTrue(e.getMessage().contains("n'a pas de coordonnées GPS (latitude/longitude) valides."));
     }
 
-    // --- Tests pour les méthodes CRUD simples ---
+    // --- NOUVEAUX TESTS POUR 100% DE COUVERTURE ---
+
+    @Test
+    @DisplayName("createAndOptimizeTournee devrait lever IllegalState (Livreur sans Véhicule)")
+    void createAndOptimizeTournee_ShouldThrow_WhenLivreurMissingVehicule() {
+        // Arrange
+        Livreur livreurSansVehicule = Livreur.builder().id(livreurId).vehicule(null).build(); // Vehicule is null
+
+        when(livreurRepository.findById(livreurId)).thenReturn(Optional.of(livreurSansVehicule));
+        when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(zone));
+        when(colisRepository.findAllById(List.of(colisId1))).thenReturn(List.of(colis1));
+
+        // Act & Assert
+        Exception e = assertThrows(IllegalStateException.class, () -> {
+            tourneeService.createAndOptimizeTournee(requestDTO);
+        });
+        assertTrue(e.getMessage().contains("n'a pas de véhicule assigné."));
+
+        verify(routeOptimizationService, never()).optimizeRoutes(any(), anyString());
+    }
+
+    @Test
+    @DisplayName("createAndOptimizeTournee devrait lever IllegalState (Colis sans Poids)")
+    void createAndOptimizeTournee_ShouldThrow_WhenColisMissingPoids() {
+        // Arrange
+        Colis colisSansPoids = Colis.builder()
+                .id(colisId1)
+                .destinataire(colis1.getDestinataire())
+                .poids(null) // Poids is null
+                .build();
+
+        when(livreurRepository.findById(livreurId)).thenReturn(Optional.of(livreur));
+        when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(zone));
+        when(colisRepository.findAllById(List.of(colisId1))).thenReturn(List.of(colisSansPoids));
+
+        // Act & Assert
+        Exception e = assertThrows(IllegalStateException.class, () -> {
+            tourneeService.createAndOptimizeTournee(requestDTO);
+        });
+        assertTrue(e.getMessage().contains("n'a pas de poids défini."));
+    }
+
+    @Test
+    @DisplayName("createAndOptimizeTournee devrait lever IllegalState (Colis sans Destinataire/Adresse)")
+    void createAndOptimizeTournee_ShouldThrow_WhenColisMissingDestinataire() {
+        // Arrange
+        Colis colisSansDestinataire = Colis.builder()
+                .id(colisId1)
+                .destinataire(null) // Destinataire is null
+                .poids(colis1.getPoids())
+                .build();
+
+        when(livreurRepository.findById(livreurId)).thenReturn(Optional.of(livreur));
+        when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(zone));
+        when(colisRepository.findAllById(List.of(colisId1))).thenReturn(List.of(colisSansDestinataire));
+
+        // Act & Assert
+        Exception e = assertThrows(IllegalStateException.class, () -> {
+            tourneeService.createAndOptimizeTournee(requestDTO);
+        });
+        assertTrue(e.getMessage().contains("n'a pas de destinataire ou d'adresse valide."));
+    }
+
+    @Test
+    @DisplayName("createAndOptimizeTournee devrait lever IllegalState si l'optimisation retourne une route vide")
+    void createAndOptimizeTournee_ShouldThrow_WhenOptimizationReturnsEmpty() {
+        // Arrange
+        OptimizedRouteResponse emptyResponse = OptimizedRouteResponse.builder().tournees(Collections.emptyList()).build();
+
+        when(livreurRepository.findById(livreurId)).thenReturn(Optional.of(livreur));
+        when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(zone));
+        when(colisRepository.findAllById(List.of(colisId1))).thenReturn(List.of(colis1));
+
+        when(routeOptimizationService.optimizeRoutes(any(RouteRequest.class), anyString()))
+                .thenReturn(emptyResponse);
+
+        // Act & Assert
+        Exception e = assertThrows(IllegalStateException.class, () -> {
+            tourneeService.createAndOptimizeTournee(requestDTO);
+        });
+        assertTrue(e.getMessage().contains("L'optimisation n'a retourné aucune tournée."));
+        verify(tourneeRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("createAndOptimizeTournee devrait lever ResourceNotFound si la tournée sauvegardée est introuvable (couvre la lambda 2)")
+    void createAndOptimizeTournee_ShouldThrowResourceNotFound_OnFinalFindById() {
+        // Arrange
+        when(livreurRepository.findById(livreurId)).thenReturn(Optional.of(livreur));
+        when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(zone));
+        when(colisRepository.findAllById(List.of(colisId1))).thenReturn(List.of(colis1));
+
+        when(routeOptimizationService.optimizeRoutes(any(RouteRequest.class), anyString()))
+                .thenReturn(optimizedResponse);
+
+        // 1. Simule la sauvegarde initiale
+        when(tourneeRepository.save(any(Tournee.class))).thenReturn(savedTournee);
+
+        // 2. Simule l'échec de la recherche finale (force l'exception)
+        when(tourneeRepository.findById(tourneeId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        Exception e = assertThrows(ResourceNotFoundException.class, () -> {
+            tourneeService.createAndOptimizeTournee(requestDTO);
+        });
+        assertTrue(e.getMessage().contains("Erreur lors de la récupération de la tournée sauvegardée."));
+
+        // Vérifie que le colis a été mis à jour (sauvegarde intermédiaire réussie)
+        verify(colisRepository, times(1)).save(any(Colis.class));
+    }
+
+
+    @Test
+    @DisplayName("getTourneeById devrait lever IllegalArgumentException si l'ID n'est pas trouvé (couvre la lambda 4)")
+    void getTourneeById_ShouldThrowIllegalArgumentException_WhenNotFound() {
+        // Arrange
+        when(tourneeRepository.findByIdWithAssociations(tourneeId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        Exception e = assertThrows(IllegalArgumentException.class, () -> {
+            tourneeService.getTourneeById(tourneeId);
+        });
+        assertEquals("Tournee introuvable", e.getMessage());
+    }
 
     @Test
     @DisplayName("getTourneeById devrait retourner DTO si trouvée")
@@ -310,6 +434,20 @@ class TourneeServiceTest {
     }
 
     @Test
+    @DisplayName("updateTourneeStatus devrait lever ResourceNotFoundException si l'ID n'est pas trouvé (couvre la lambda 7)")
+    void updateTourneeStatus_ShouldThrowResourceNotFoundException_WhenNotFound() {
+        // Arrange
+        when(tourneeRepository.findById(tourneeId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        Exception e = assertThrows(ResourceNotFoundException.class, () -> {
+            tourneeService.updateTourneeStatus(tourneeId, StatutTournee.EN_COURS);
+        });
+        assertTrue(e.getMessage().contains("Tournée non trouvée avec l'ID: " + tourneeId));
+        verify(tourneeRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("deleteTournee devrait dé-associer les colis et supprimer la tournée")
     void deleteTournee_ShouldDisassociateColisAndRemove() {
         // Arrange
@@ -330,5 +468,19 @@ class TourneeServiceTest {
 
         // 2. Vérifier que la tournée a été supprimée
         verify(tourneeRepository, times(1)).delete(savedTournee);
+    }
+
+    @Test
+    @DisplayName("deleteTournee devrait lever ResourceNotFoundException si l'ID n'est pas trouvé (couvre la lambda 5)")
+    void deleteTournee_ShouldThrowResourceNotFoundException_WhenNotFound() {
+        // Arrange
+        when(tourneeRepository.findById(tourneeId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        Exception e = assertThrows(ResourceNotFoundException.class, () -> {
+            tourneeService.deleteTournee(tourneeId);
+        });
+        assertTrue(e.getMessage().contains("Tournée non trouvée avec l'ID: " + tourneeId));
+        verify(tourneeRepository, never()).delete(any());
     }
 }

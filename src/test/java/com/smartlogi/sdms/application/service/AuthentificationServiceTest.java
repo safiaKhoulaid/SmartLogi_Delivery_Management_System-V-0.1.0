@@ -6,8 +6,9 @@ import com.smartlogi.sdms.domain.model.enums.Role;
 import com.smartlogi.sdms.domain.model.vo.Adresse;
 import com.smartlogi.sdms.domain.model.vo.Telephone;
 import com.smartlogi.sdms.domain.repository.BaseUserRepository;
-import com.smartlogi.sdms.presentation.controller.auth.AuthentificationRequest;
-import com.smartlogi.sdms.presentation.controller.auth.AuthentificationResponse;
+import com.smartlogi.sdms.application.dto.auth.AuthentificationRequest;
+import com.smartlogi.sdms.application.dto.auth.AuthentificationResponse;
+import com.smartlogi.sdms.application.dto.auth.RegisterResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -87,7 +88,8 @@ class AuthentificationServiceTest {
     @Test
     @DisplayName("register devrait sauvegarder l'utilisateur et retourner un token")
     void register_ShouldSaveUserAndReturnToken() {
-        // Arrange
+        //
+
         String hashedPassword = "hashedPassword123";
 
         // 1. Simuler l'encodage du mot de passe
@@ -101,11 +103,10 @@ class AuthentificationServiceTest {
         when(jwtService.generateToken(any(BaseUser.class))).thenReturn(dummyToken);
 
         // Act
-        AuthentificationResponse response = authentificationService.register(registerDTO);
+        RegisterResponse response = authentificationService.register(registerDTO);
 
         // Assert
         assertNotNull(response);
-        assertEquals(dummyToken, response.getToken());
 
         // Vérifier l'utilisateur capturé avant la sauvegarde
         BaseUser capturedUser = userCaptor.getValue();
@@ -194,4 +195,5 @@ class AuthentificationServiceTest {
         // S'assurer qu'on n'a jamais généré de token
         verify(jwtService, never()).generateToken(any());
     }
+
 }

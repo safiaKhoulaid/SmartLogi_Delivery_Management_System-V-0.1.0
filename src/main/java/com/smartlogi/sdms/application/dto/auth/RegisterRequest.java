@@ -1,4 +1,4 @@
-package com.smartlogi.sdms.presentation.controller.auth;
+package com.smartlogi.sdms.application.dto.auth;
 
 import com.smartlogi.sdms.domain.model.enums.Role;
 import com.smartlogi.sdms.domain.model.vo.Adresse;

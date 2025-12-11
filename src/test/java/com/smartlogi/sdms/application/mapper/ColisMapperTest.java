@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class ColisMapperTest {
 
-    @Autowired // Correction appliquée
+class ColisMapperTest {
+    @Autowired
     private ColisMapper colisMapper;
 
     @Test

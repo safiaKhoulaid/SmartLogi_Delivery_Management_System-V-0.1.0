@@ -39,7 +39,7 @@
         <sonar.projectKey>sdms</sonar.projectKey>
         <sonar.projectName>SDMS</sonar.projectName>
         <sonar.host.url>http://localhost:9000</sonar.host.url>
-        <sonar.token>sqp_3b0dac2b6725d82550d60df7f369df1eb9aa9a66</sonar.token>
+        <sonar.token>sqp_3e6a819ddd5b404781cf24ebc4dfafdcb01605c4</sonar.token>
     </properties>
 
     <dependencies>
