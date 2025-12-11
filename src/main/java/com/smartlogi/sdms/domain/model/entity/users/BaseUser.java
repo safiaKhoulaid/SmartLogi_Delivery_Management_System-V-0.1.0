@@ -1,9 +1,11 @@
 package com.smartlogi.sdms.domain.model.entity.users;
 
+import com.smartlogi.sdms.domain.model.enums.Role;
 import com.smartlogi.sdms.domain.model.vo.Adresse;
 import com.smartlogi.sdms.domain.model.vo.Telephone;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,22 +14,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Entity
-@Table(name = "base_user") // nommer le table
 @Getter
 @Setter
+@Entity
+@Table(name = "base_user")
+
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@ToString(exclude = "relations")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString()
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "type_utilisateur", discriminatorType = DiscriminatorType.STRING)
+@Accessors(chain = true)
 
 public abstract class BaseUser implements UserDetails {
+public class BaseUser implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "user_id")
     private String id;
 
     @Column(name = "first_name", nullable = false)
@@ -90,5 +94,35 @@ public abstract class BaseUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    /**
+     * @return
+     */
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
     }
 }

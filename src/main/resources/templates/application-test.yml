@@ -1,0 +1,32 @@
+spring:
+  # Configuration de la base de données en mémoire H2 pour les tests
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    # Utilisez 'create-drop' pour recréer le schéma à chaque test
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false # Désactiver les logs SQL pendant les tests
+
+  # Désactiver Liquibase pendant les tests si H2 est utilisé pour un schéma éphémère
+  liquibase:
+    enabled: false
+
+  # Désactiver l'initialisation du service de mail (simuler)
+  mail:
+    host: disabled.test.host
+    port: 3000
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+server:
+  port: 8089 # Port différent pour éviter les conflits

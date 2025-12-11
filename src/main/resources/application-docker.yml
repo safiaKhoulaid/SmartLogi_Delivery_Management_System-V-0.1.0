@@ -1,0 +1,66 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db-1:5432/smartlogi_db_v2
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    open-in-view: false
+
+  liquibase:
+    change-log: db/changelog/db.changelog-master.xml
+
+  security:
+    user:
+      name: admin
+      password: 1234
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: safiakhoulaid11@gmail.com
+    password: rzmbeusgvddkdoix
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: smtp.gmail.com
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: my-spring-app
+
+springdoc:
+  api-docs:
+    path: /v1/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    defaultModelsExpandDepth: 1
+    displayRequestDuration: true
+logging:
+  level:
+    root: INFO
+  file:
+    name: logs/springboot.log
