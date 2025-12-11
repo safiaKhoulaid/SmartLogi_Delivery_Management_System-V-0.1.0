@@ -7,7 +7,6 @@ services:
 
     container_name: spring-app
 
-    # 2. Mohim: Bach dima yjib l version jdida mn Docker Hub
     pull_policy: always
 
     # 3. Ila tfa container (crash), y-redemarrer rasso
