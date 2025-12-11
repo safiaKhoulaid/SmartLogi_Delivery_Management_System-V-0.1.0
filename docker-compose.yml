@@ -8,7 +8,6 @@ services:
 
     pull_policy: always
 
-    # 3. Ila tfa container (crash), y-redemarrer rasso
     restart: always
 
     ports:
