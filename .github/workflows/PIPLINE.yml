@@ -23,7 +23,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # C - Make mvnw executable
       - name: Make mvnw executable
         run: chmod +x mvnw
 

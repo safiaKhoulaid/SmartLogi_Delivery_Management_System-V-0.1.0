@@ -119,6 +119,7 @@ networks:
     driver: bridge
 
 volumes:
+  postgres_data_prod:    # <--- HADI LI KANT NAQSA
   elasticsearch_data:
   sonarqube_data:
   sonarqube_logs:
