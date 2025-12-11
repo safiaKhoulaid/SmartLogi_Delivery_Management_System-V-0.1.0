@@ -1,6 +1,5 @@
 name: Spring Boot CI/CD
 
-# 1. Triggers: Fo9ach had l pipeline khassou ykhdem?
 on:
   push:
     branches: [ "main" ]
