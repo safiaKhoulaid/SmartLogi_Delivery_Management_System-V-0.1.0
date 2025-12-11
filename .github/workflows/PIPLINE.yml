@@ -29,3 +29,5 @@ jobs:
         run: chmod +x ./mvnw
       - name: Build with Maven
         run: ./mvnw clean package -DskipTests
+      - name: Run Unit Tests
+        run: ./mvnw test
