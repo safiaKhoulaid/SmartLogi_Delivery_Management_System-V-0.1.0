@@ -5,12 +5,14 @@ import com.smartlogi.sdms.domain.model.enums.StatusColis;
 import com.smartlogi.sdms.domain.model.vo.Poids;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
-@Builder
-public class ColisResponseDTO {
+@Getter
+@Setter
+@Builder(access = lombok.AccessLevel.PUBLIC)public class ColisResponseDTO {
 
     // --- Identification du Colis ---
     private String id; // Type String, car c'est un UUID généré

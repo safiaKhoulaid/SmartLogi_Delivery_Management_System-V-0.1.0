@@ -1,0 +1,30 @@
+name: Spring Boot CI/CD
+
+# 1. Triggers: Fo9ach had l pipeline khassou ykhdem?
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # 2. Job 1: Build l application
+  build:
+    runs-on: ubuntu-latest  # GitHub kay3tik PC sghir fih Linux (Ubuntu)
+
+    steps:
+      # Etape A: Jib l code mn GitHub l had l PC (Runner)
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Etape B: Installi Java (JDK) f hadak l PC
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven # Gardi les dépendances f cache bach mayb9ach ytelechargihom dima
+
+      # Etape C: Lansi Build Maven (bla tests db)
+      - name: Build with Maven
+        run: ./mvnw clean package -DskipTests

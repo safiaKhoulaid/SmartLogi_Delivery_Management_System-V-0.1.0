@@ -1,14 +1,12 @@
-package com.smartlogi.sdms.presentation.controller.auth;
+package com.smartlogi.sdms.application.dto.auth;
 
 import com.smartlogi.sdms.domain.model.enums.Role;
 import com.smartlogi.sdms.domain.model.vo.Adresse;
 import com.smartlogi.sdms.domain.model.vo.Telephone;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
-@Builder
+@Getter
+@Setter
 @AllArgsConstructor
 public class RegisterRequest {
 

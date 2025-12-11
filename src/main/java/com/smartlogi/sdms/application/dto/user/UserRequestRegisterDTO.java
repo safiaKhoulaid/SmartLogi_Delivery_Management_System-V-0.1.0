@@ -8,6 +8,7 @@ import com.smartlogi.sdms.domain.model.vo.Telephone;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull; // AJOUTEZ CET IMPORT
 import lombok.*;
 
 @Getter
@@ -35,10 +36,12 @@ public class UserRequestRegisterDTO {
     @NotBlank(message = "Votre nom est require")
     private String nom;
 
-    @NotBlank(message = "Numero de telephone est require")
+    // CORRECTION APPLIQUÉE
+    @NotNull(message = "Numero de telephone est require")
     private Telephone telephone;
 
-    @NotBlank(message = "Adresse est require")
+    // CORRECTION APPLIQUÉE
+    @NotNull(message = "Adresse est require")
     private Adresse adresse;
 
     @Enumerated

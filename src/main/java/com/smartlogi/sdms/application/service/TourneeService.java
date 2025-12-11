@@ -18,6 +18,10 @@ import com.smartlogi.sdms.domain.repository.LivreurRepository;
 import com.smartlogi.sdms.domain.repository.TourneeRepository;
 import com.smartlogi.sdms.domain.repository.ZoneRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -177,17 +181,33 @@ public class TourneeService {
     }
     // --- Autres méthodes CRUD (l'ID de Tournee est un Long) ---
 
-    public TourneeResponseDTO getTourneeById(Long id) {
-        Tournee tournee = tourneeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tournée non trouvée avec l'ID: " + id));
+
+
+    @Transactional(readOnly = true)
+    public TourneeResponseDTO getTourneeById(long id) {
+        var tournee = tourneeRepository.findByIdWithAssociations(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tournee introuvable"));
+        // mapping à l'intérieur de la transaction pour éviter LazyInitializationException
         return tourneeMapper.toResponseDTO(tournee);
     }
 
-    public List<TourneeResponseDTO> getTourneesByLivreur(String livreurId) {
-        return tourneeRepository.findByLivreurId(livreurId).stream()
-                .map(tourneeMapper::toResponseDTO)
-                .collect(Collectors.toList());
+
+//    public List<TourneeResponseDTO> getTourneesByLivreur(String livreurId) {
+//        return tourneeRepository.findByLivreurId(livreurId).stream()
+//                .map(tourneeMapper::toResponseDTO)
+//                .collect(Collectors.toList());
+//    }
+
+    @Transactional(readOnly = true)
+    public Page<TourneeResponseDTO> getTourneesByLivreur(String livreurId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("dateDepart").descending());
+
+        Page<Tournee> tournees = tourneeRepository.findByLivreurIdWithAssociations(livreurId, pageable);
+
+        // map Page<Tournee> vers Page<TourneeResponseDTO>
+        return tournees.map(tourneeMapper::toResponseDTO);
     }
+
 
     @Transactional
     public void deleteTournee(Long id) {

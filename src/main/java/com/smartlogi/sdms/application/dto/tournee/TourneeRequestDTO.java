@@ -3,11 +3,14 @@ package com.smartlogi.sdms.application.dto.tournee;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+@Setter
+@Getter
 public class TourneeRequestDTO {
 
     @NotNull(message = "La date de la tournée ne peut pas être nulle.")

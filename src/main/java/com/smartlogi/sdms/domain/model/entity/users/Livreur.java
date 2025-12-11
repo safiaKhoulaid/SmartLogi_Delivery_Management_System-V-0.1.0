@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List; // Import requis
 
 @Setter
@@ -32,6 +33,8 @@ public class Livreur extends BaseUser {
     @Embedded
     private Vehicule vehicule;
 
+    @Column(name = "dateDepart")
+    private LocalDateTime dateDepart;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "zone_assignee_id")
     private Zone zoneAssignee;

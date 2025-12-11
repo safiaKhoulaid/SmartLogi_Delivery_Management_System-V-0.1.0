@@ -2,11 +2,12 @@ package com.smartlogi.sdms.application.mapper;
 
 import com.smartlogi.sdms.application.dto.tournee.TourneeResponseDTO;
 import com.smartlogi.sdms.domain.model.entity.Tournee;
-import jakarta.transaction.Transactional;
+// Supprimez cette ligne : import jakarta.transaction.Transactional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-@Transactional
+
+// Supprimez cette ligne : @Transactional
 @Mapper(componentModel = "spring", uses = {ColisMapper.class})
 public interface TourneeMapper {
 

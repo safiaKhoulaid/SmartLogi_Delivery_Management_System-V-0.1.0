@@ -59,7 +59,7 @@ public class Colis {
     private ClientExpediteur clientExpediteur;
 
     // La personne qui reçoit le colis
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "destinataire_id", nullable = false)
     private Destinataire destinataire;
 
@@ -67,16 +67,16 @@ public class Colis {
     LocalDateTime createdAt;
 
     // Le livreur actuellement assigné à ce colis (peut être NULL si EN_STOCK)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "livreur_collecte_id")
     private Livreur livreurCollecte;
 
     // La zone logistique de destination du colis
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "livreur_livraison_id")
     private Livreur livreurLivraison;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "zone_destination_id", nullable = false)
     private Zone zoneDestination;
 

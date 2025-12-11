@@ -8,12 +8,15 @@ import com.smartlogi.sdms.domain.model.vo.Poids;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @ColisDestinataireValid
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class ColisRequestDTO {
 

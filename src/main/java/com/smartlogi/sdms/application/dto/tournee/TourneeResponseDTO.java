@@ -2,12 +2,17 @@ package com.smartlogi.sdms.application.dto.tournee;
 
 import com.smartlogi.sdms.application.dto.colis.ColisResponseDTO;
 import com.smartlogi.sdms.domain.model.enums.StatutTournee;
-import lombok.Data;
+import jakarta.transaction.Transactional;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+@Setter
+@Getter
+@Builder // AJOUTÉ
+@NoArgsConstructor // AJOUTÉ
+@AllArgsConstructor // AJOUTÉ
 public class TourneeResponseDTO {
     private Long id;
     private LocalDate dateTournee;

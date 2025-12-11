@@ -1,7 +1,7 @@
 package com.smartlogi.sdms.domain.model.entity;
 
 import com.smartlogi.sdms.domain.model.entity.users.Livreur;
-import com.smartlogi.sdms.domain.model.vo.Adresse; // <-- 1. IMPORT NECESSAIRE
+import com.smartlogi.sdms.domain.model.vo.Adresse;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -38,9 +38,10 @@ public class Zone {
     @AttributeOverrides({
             @AttributeOverride(name = "rue", column = @Column(name = "depot_rue")), // (Vérifiez si "depot_numero" et les autres sont corrects)
             @AttributeOverride(name = "ville", column = @Column(name = "depot_ville")),
+            @AttributeOverride(name = "numero", column = @Column(name = "depot_numero")),
             @AttributeOverride(name = "codePostal", column = @Column(name = "depot_code_postal")),
             @AttributeOverride(name = "pays", column = @Column(name = "depot_pays")),
-            // ... (assurez-vous que depot_numero est aussi mappé si vous l'avez)
+
 
             @AttributeOverride(name = "latitude", column = @Column(name = "depot_attitide")), // <-- CORRIGÉ (selon votre typo)
             @AttributeOverride(name = "longitude", column = @Column(name = "depotlangtitude")) // <-- CORRIGÉ (selon votre typo)

@@ -1,12 +1,11 @@
 package com.smartlogi.sdms.application.dto.routes;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor // This constructor requires: (LocationDTO, List<LocationDTO>, List<LivreurData>)
 public class RouteRequest {

@@ -11,4 +11,6 @@ public interface BaseUserRepository extends JpaRepository<BaseUser, String> {
 
     //Méthode pout récupérer un utilisateur par son email
     Optional<BaseUser> findByEmail(String username);
+
+    boolean existsByEmail(String email);
 }
