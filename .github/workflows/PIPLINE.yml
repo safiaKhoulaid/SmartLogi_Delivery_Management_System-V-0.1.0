@@ -23,8 +23,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven # Gardi les dépendances f cache bach mayb9ach ytelechargihom dima
+          cache: maven #
 
-      # Etape C: Lansi Build Maven (bla tests db)
+      - name: Make mvnw executable
+        run: chmod +x ./mvnw
       - name: Build with Maven
         run: ./mvnw clean package -DskipTests
