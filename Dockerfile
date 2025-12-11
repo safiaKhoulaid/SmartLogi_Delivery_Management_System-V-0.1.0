@@ -12,7 +12,6 @@ RUN mvn -B clean package -DskipTests
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
-# Copier le JAR repackagé produit par Maven (utilise le pattern pour éviter de hardcoder le nom)
 COPY --from=builder /workspace/target/*.jar app.jar
 
 EXPOSE 8080
