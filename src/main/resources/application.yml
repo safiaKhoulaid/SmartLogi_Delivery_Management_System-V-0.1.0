@@ -60,3 +60,19 @@ springdoc:
     operationsSorter: method
     defaultModelsExpandDepth: 1
     displayRequestDuration: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      ssl:
+        enabled: false
+
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
