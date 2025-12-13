@@ -6,6 +6,7 @@ import com.smartlogi.sdms.application.dto.auth.AuthentificationResponse;
 import com.smartlogi.sdms.application.dto.auth.RegisterResponse;
 import com.smartlogi.sdms.application.dto.user.UserRequestRegisterDTO;
 import com.smartlogi.sdms.domain.exception.UserAlreadyExistsException;
+import com.smartlogi.sdms.domain.model.entity.RefreshToken;
 import com.smartlogi.sdms.domain.model.entity.users.BaseUser;
 import com.smartlogi.sdms.domain.repository.BaseUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class AuthentificationService {
     private final BaseUserRepository baseUserRepository;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public RegisterResponse register(UserRequestRegisterDTO request) {
         String email = request.getEmail();
@@ -65,9 +67,11 @@ public class AuthentificationService {
         BaseUser user = baseUserRepository.findByEmail(request.getEmail())
                 .orElseThrow();
         String jwt = jwtService.generateToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
         return AuthentificationResponse.builder()
                 .token(jwt)
                 .massage("Vous étés connecte par succès !")
+                .refreshToken(refreshToken.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .build();

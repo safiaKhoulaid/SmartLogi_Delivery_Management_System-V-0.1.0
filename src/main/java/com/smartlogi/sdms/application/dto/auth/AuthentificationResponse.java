@@ -15,5 +15,6 @@ public class AuthentificationResponse {
     private String lastName;
     private String email;
     private String token;
+    private String refreshToken;
 
 }

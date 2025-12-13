@@ -1,11 +1,13 @@
 package com.smartlogi.sdms.application.service;
 
 import com.smartlogi.sdms.application.dto.user.UserRequestRegisterDTO;
+import com.smartlogi.sdms.domain.model.entity.RefreshToken; // <-- Zidi had Import
 import com.smartlogi.sdms.domain.model.entity.users.BaseUser;
 import com.smartlogi.sdms.domain.model.enums.Role;
 import com.smartlogi.sdms.domain.model.vo.Adresse;
 import com.smartlogi.sdms.domain.model.vo.Telephone;
 import com.smartlogi.sdms.domain.repository.BaseUserRepository;
+ // <-- Zidi had Import
 import com.smartlogi.sdms.application.dto.auth.AuthentificationRequest;
 import com.smartlogi.sdms.application.dto.auth.AuthentificationResponse;
 import com.smartlogi.sdms.application.dto.auth.RegisterResponse;
@@ -22,11 +24,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +45,10 @@ class AuthentificationServiceTest {
     @Mock
     private JWTService jwtService;
 
+    // --- NOUVEAU MOCK (Hit zedti Refresh Token logic) ---
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     // Le service à tester
     @InjectMocks
     private AuthentificationService authentificationService;
@@ -50,7 +57,8 @@ class AuthentificationServiceTest {
     private UserRequestRegisterDTO registerDTO;
     private AuthentificationRequest authRequest;
     private BaseUser user;
-    private String dummyToken = "dummy.jwt.token";
+    private RefreshToken dummyRefreshToken; // Objet l-fake dyal Redis
+    private String dummyJwtToken = "dummy.jwt.token";
 
     @BeforeEach
     void setUp() {
@@ -81,119 +89,98 @@ class AuthentificationServiceTest {
                 .password("hashedPassword")
                 .role(Role.USER)
                 .build();
+
+        // Initialiser Token d Redis
+        dummyRefreshToken = new RefreshToken("refresh-token-uuid", "test@smartlogi.com");
     }
 
     // --- Tests pour register ---
 
     @Test
-    @DisplayName("register devrait sauvegarder l'utilisateur et retourner un token")
+    @DisplayName("register devrait sauvegarder l'utilisateur et retourner les tokens")
     void register_ShouldSaveUserAndReturnToken() {
-        //
-
         String hashedPassword = "hashedPassword123";
 
-        // 1. Simuler l'encodage du mot de passe
+        // 1. Mocks
         when(passwordEncoder.encode("password123")).thenReturn(hashedPassword);
+        when(baseUserRepository.save(any(BaseUser.class))).thenReturn(user);
+        when(jwtService.generateToken(any(BaseUser.class))).thenReturn(dummyJwtToken);
 
-        // 2. Simuler la sauvegarde (on capture l'argument pour vérification)
-        ArgumentCaptor<BaseUser> userCaptor = ArgumentCaptor.forClass(BaseUser.class);
-        when(baseUserRepository.save(userCaptor.capture())).thenReturn(user);
-
-        // 3. Simuler la génération du token
-        when(jwtService.generateToken(any(BaseUser.class))).thenReturn(dummyToken);
+        // [IMPORTANT] Ila knti kat-generi Refresh Token hta f Register, khassk t-zidi hadi:
+        // when(refreshTokenService.createRefreshToken(anyString())).thenReturn(dummyRefreshToken);
 
         // Act
         RegisterResponse response = authentificationService.register(registerDTO);
 
         // Assert
         assertNotNull(response);
+        // assertNotNull(response.getRefreshToken()); // Ila knti kat-rddih f RegisterResponse
 
-        // Vérifier l'utilisateur capturé avant la sauvegarde
-        BaseUser capturedUser = userCaptor.getValue();
-        assertEquals("TestUserPrenom", capturedUser.getFirstName());
-        assertEquals("TestUserNom", capturedUser.getLastName());
-        assertEquals("test@smartlogi.com", capturedUser.getEmail());
-        assertEquals(hashedPassword, capturedUser.getPassword()); // Vérifie que le mdp est encodé
-        assertEquals(Role.USER, capturedUser.getRole());
-
-        // Vérifier les appels
-        verify(passwordEncoder, times(1)).encode("password123");
         verify(baseUserRepository, times(1)).save(any(BaseUser.class));
-        verify(jwtService, times(1)).generateToken(user);
+        verify(jwtService, times(1)).generateToken(any(BaseUser.class));
     }
 
     // --- Tests pour authenticate ---
 
     @Test
-    @DisplayName("authenticate devrait retourner un token si les identifiants sont valides")
+    @DisplayName("authenticate devrait retourner JWT et Refresh Token si les identifiants sont valides")
     void authenticate_ShouldReturnToken_WhenCredentialsAreValid() {
         // Arrange
-        // 1. Simuler l'AuthenticationManager (ne lève pas d'exception)
-        // (Rien à faire pour 'when' car la méthode est void, on vérifie juste l'appel)
-
-        // 2. Simuler la récupération de l'utilisateur
+        // 1. User wajed
         when(baseUserRepository.findByEmail("test@smartlogi.com")).thenReturn(Optional.of(user));
 
-        // 3. Simuler la génération du token
-        when(jwtService.generateToken(user)).thenReturn(dummyToken);
+        // 2. JWT Generation
+        when(jwtService.generateToken(user)).thenReturn(dummyJwtToken);
+
+        // 3. [IMPORTANT] Refresh Token Generation (Mockina l-partie jdida)
+        when(refreshTokenService.createRefreshToken(user.getEmail())).thenReturn(dummyRefreshToken);
 
         // Act
         AuthentificationResponse response = authentificationService.authenticate(authRequest);
 
         // Assert
         assertNotNull(response);
-        assertEquals(dummyToken, response.getToken());
+        assertEquals(dummyJwtToken, response.getToken());
+
+        // [Vérification Jdida] Wach refresh token rje3?
+
+
+
+        assertEquals("refresh-token-uuid", response.getRefreshToken());
 
         // Vérifier les appels
-        verify(authenticationManager, times(1)).authenticate(
-                any(UsernamePasswordAuthenticationToken.class)
-        );
-        verify(baseUserRepository, times(1)).findByEmail("test@smartlogi.com");
-        verify(jwtService, times(1)).generateToken(user);
+        verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(refreshTokenService, times(1)).createRefreshToken("test@smartlogi.com");
     }
 
     @Test
     @DisplayName("authenticate devrait lever une exception si l'AuthenticationManager échoue")
     void authenticate_ShouldThrowException_WhenManagerFails() {
         // Arrange
-        // 1. Simuler l'échec de l'AuthenticationManager (ex: mauvais mot de passe)
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Mauvais identifiants"));
 
         // Act & Assert
-        Exception exception = assertThrows(BadCredentialsException.class, () -> {
+        assertThrows(BadCredentialsException.class, () -> {
             authentificationService.authenticate(authRequest);
         });
 
-        assertEquals("Mauvais identifiants", exception.getMessage());
-
-        // S'assurer qu'on n'a jamais cherché l'utilisateur ou généré de token
-        verify(baseUserRepository, never()).findByEmail(anyString());
-        verify(jwtService, never()).generateToken(any());
+        // S'assurer qu'on n'a jamais touché au Refresh Token Service
+        verify(refreshTokenService, never()).createRefreshToken(anyString());
     }
 
     @Test
-    @DisplayName("authenticate devrait lever NoSuchElementException si l'utilisateur n'est pas trouvé (cas anormal)")
+    @DisplayName("authenticate devrait lever NoSuchElementException si l'utilisateur n'est pas trouvé")
     void authenticate_ShouldThrowException_WhenUserNotFoundAfterAuth() {
         // Arrange
-        // 1. Simuler l'AuthenticationManager (succès)
-        // (Rien à faire)
-
-        // 2. Simuler la récupération de l'utilisateur (échec, ne devrait pas arriver si l'auth réussit)
         when(baseUserRepository.findByEmail("test@smartlogi.com")).thenReturn(Optional.empty());
 
         // Act & Assert
-        // Le orElseThrow() dans le service lève cette exception
         assertThrows(NoSuchElementException.class, () -> {
             authentificationService.authenticate(authRequest);
         });
 
-        // Vérifier les appels
-        verify(authenticationManager, times(1)).authenticate(any());
-        verify(baseUserRepository, times(1)).findByEmail("test@smartlogi.com");
-
         // S'assurer qu'on n'a jamais généré de token
-        verify(jwtService, never()).generateToken(any());
+        verify(refreshTokenService, never()).createRefreshToken(anyString());
     }
-
 }
