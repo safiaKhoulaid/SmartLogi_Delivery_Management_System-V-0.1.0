@@ -36,6 +36,21 @@ spring:
           ssl:
             trust: smtp.gmail.com
 
+  data:
+    redis:
+      host: redis   # hostname ديال service فـ docker-compose
+      port: 6379
+      password: ""
+      ssl:
+        enabled: false
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
 server:
   port: 8081
 
@@ -60,19 +75,3 @@ springdoc:
     operationsSorter: method
     defaultModelsExpandDepth: 1
     displayRequestDuration: true
-
-  data:
-    redis:
-      host: my-redis
-      port: 6379
-      password:
-      ssl:
-        enabled: false
-
-      timeout: 60000
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
-          max-wait: -1ms
