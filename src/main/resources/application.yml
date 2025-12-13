@@ -63,7 +63,7 @@ springdoc:
 
   data:
     redis:
-      host: localhost
+      host: my-redis
       port: 6379
       password:
       ssl:
