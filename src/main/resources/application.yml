@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres-db:5432/smartlogi_db_v2
+    url: jdbc:postgresql://localhost:5432/smartlogi_db_v2
     username: postgres
     password: 1234
     driver-class-name: org.postgresql.Driver
@@ -63,7 +63,7 @@ springdoc:
 
   data:
     redis:
-      host: postgres-db
+      host: localhost
       port: 6379
       password:
       ssl:
