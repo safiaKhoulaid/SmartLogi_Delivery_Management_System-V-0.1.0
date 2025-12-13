@@ -40,7 +40,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ColisServiceTest {
 
-    // --- Mocks pour toutes les dépendances ---
     @Mock
     private ColisRepository colisRepository;
     @Mock
