@@ -12,6 +12,7 @@ services:
 
     ports:
       - "8080:8080"
+      - "5005:5005"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       # Hna l'url khasso ybqa db-1 hit hwa smiyt service ta7t
@@ -34,7 +35,10 @@ services:
     # 4. Mohim: Volume bach Data matmchich ila tfa Server
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
-
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
 
 
 #  prometheus:
