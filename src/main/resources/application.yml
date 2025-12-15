@@ -115,3 +115,12 @@ springdoc:
     operationsSorter: method
     defaultModelsExpandDepth: 1
     displayRequestDuration: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 61172088660-h3c3gutkcb3nj04n2l6o07afqs77p9a2.apps.googleusercontent.com
+            client-secret: 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
+            scope: openid, profile, email

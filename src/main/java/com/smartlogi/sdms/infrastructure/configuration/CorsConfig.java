@@ -13,11 +13,11 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // 1. Hada kay-3ni: Tabbaq CORS 3la ga3 les endpoints API
-                        .allowedOrigins("http://localhost:4200", "https://system-livraison-front.vercel.app/") // 2. Hna fin kaina l-khedma
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 3. Methods msmou7a
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:4200", "https://system-livraison-front.vercel.app/")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true); // Ila knti kat-sta3mli cookies wla authentication headers
+                        .allowCredentials(true);
             }
         };
     }
