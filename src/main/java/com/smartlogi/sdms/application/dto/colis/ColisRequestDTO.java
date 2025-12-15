@@ -34,8 +34,6 @@ public class ColisRequestDTO {
 
     // --- Détails du Colis ---
 
-    // La description peut être vide (pas de @NotBlank), mais ici, elle est un String.
-    // Si la description est essentielle, ajoutez @NotBlank.
     private String description;
 
     @NotNull(message = "Le poids est obligatoire.")

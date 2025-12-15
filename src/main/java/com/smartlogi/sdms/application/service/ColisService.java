@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,19 +26,20 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j // 👈 AJOUT 2: Annotation pour activer le logger 'log'
+@Slf4j
 public class ColisService {
 
     private final ColisRepository colisRepository;
     private final DestinataireRepository destinataireRepository;
     private final BaseUserService baseUserService;
     private final ColisMapper colisMapper;
-    private final ZoneRepository zoneRepository; // AJOUT: Repository de Zone
+    private final ZoneRepository zoneRepository;
     private final ClientExpediteurRepository clientExpediteurRepository;
     public final MissionRepository missionRepository;
 
 
     @Transactional
+    @PreAuthorize("hasAuthority()")
     public Colis createColis(ColisRequestDTO dto) {
 
         log.info("Début de la création du colis pour l'expéditeur: {}", dto.getExpediteurId());
@@ -48,7 +50,6 @@ public class ColisService {
             throw new ValidationException("L'ID de l'expéditeur est obligatoire.");
         }
 
-        // 🗑️ SUPPRESSION : La ligne 50 (l'appel .get() dangereux) a été supprimée.
 
         // Validation Mutuellement Exclusive pour le Destinataire
         if (dto.getDestinataireId() != null && dto.getDestinataireInfo() != null) {
