@@ -1,5 +1,6 @@
 package com.smartlogi.sdms.application.service;
 
+import com.smartlogi.sdms.domain.exception.PermissionAlreadyExistsException;
 import com.smartlogi.sdms.domain.exception.ResourceNotFoundException;
 import com.smartlogi.sdms.domain.model.entity.Permission;
 import com.smartlogi.sdms.domain.model.enums.Role;
@@ -7,6 +8,7 @@ import com.smartlogi.sdms.domain.repository.PermissionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +24,7 @@ public class PermissionService {
     // --- 1. CRUD Permissions  ---
     public Permission createPermission(String name) {
         if (permissionRepository.existsByName(name)) {
-            throw new IllegalArgumentException("Permission '" + name + "' existe déjà.");
+            throw new PermissionAlreadyExistsException("Permission '" + name + "' existe déjà.");
         }
 
         Permission p = Permission

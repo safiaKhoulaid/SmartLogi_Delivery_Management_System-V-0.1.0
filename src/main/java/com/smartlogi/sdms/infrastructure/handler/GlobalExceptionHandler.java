@@ -1,7 +1,9 @@
 package com.smartlogi.sdms.infrastructure.handler;
 
+import com.smartlogi.sdms.domain.exception.PermissionAlreadyExistsException;
 import com.smartlogi.sdms.domain.exception.ResourceNotFoundException;
 import com.smartlogi.sdms.domain.exception.UserAlreadyExistsException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -98,6 +100,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDetails> handleAccessDeniedException(AccessDeniedException exception, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Accès non autorisé. Vous n'avez pas les droits nécessaires pour effectuer cette action.", request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN); // Renvoie 403
+    }
+
+    @ExceptionHandler(PermissionAlreadyExistsException.class)
+    public ResponseEntity<ErrorDetails> permissionAlreadyExistsException(PermissionAlreadyExistsException ex , WebRequest request){
+        ErrorDetails errorDetails =  new ErrorDetails(LocalDateTime.now() , "cette permission exists déja ! " ,request.getDescription(false) ) ;
+        return new ResponseEntity<>(errorDetails ,  HttpStatus.CONFLICT) ;
     }
 
 }

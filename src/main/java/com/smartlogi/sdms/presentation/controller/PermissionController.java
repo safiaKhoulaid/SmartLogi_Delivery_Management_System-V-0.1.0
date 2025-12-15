@@ -20,6 +20,7 @@ import java.util.List;
 @RequestMapping("/api/v1/admin/permissions")
 @RequiredArgsConstructor
 // 🔒 SÉCURITÉ: Ghir ADMIN
+
 @PreAuthorize("hasRole('ADMIN')")
 public class PermissionController {
 
