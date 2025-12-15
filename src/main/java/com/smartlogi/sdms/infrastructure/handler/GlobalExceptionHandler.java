@@ -35,13 +35,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND); // Renvoie 404
     }
 
-    // --- GESTIONNAIRES AJOUTÉS ---
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorDetails> handleAccessDeniedException(AccessDeniedException exception, WebRequest request) {
-        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Accès non autorisé. Vous n'avez pas les droits nécessaires pour effectuer cette action.", request.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN); // Renvoie 403
-    }
+
 
     // (Handler pour MethodArgumentNotValidException - 400 - si vous l'avez ajouté)
 
@@ -96,6 +91,13 @@ public class GlobalExceptionHandler {
                 request.getDescription(false)
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT); // 409
+    }
+
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorDetails> handleAccessDeniedException(AccessDeniedException exception, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Accès non autorisé. Vous n'avez pas les droits nécessaires pour effectuer cette action.", request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN); // Renvoie 403
     }
 
 }

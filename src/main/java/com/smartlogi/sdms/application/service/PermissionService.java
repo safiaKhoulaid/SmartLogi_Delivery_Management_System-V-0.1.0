@@ -6,6 +6,7 @@ import com.smartlogi.sdms.domain.model.enums.Role;
 import com.smartlogi.sdms.domain.repository.PermissionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,74 +14,74 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class PermissionService {
 
     private final PermissionRepository permissionRepository;
 
-    // 1. CREATE
+    // --- 1. CRUD Permissions  ---
     public Permission createPermission(String name) {
         if (permissionRepository.existsByName(name)) {
-            throw new IllegalArgumentException("Permission avec le nom '" + name + "' existe déjà.");
+            throw new IllegalArgumentException("Permission '" + name + "' existe déjà.");
         }
-        Permission permission = new Permission();
-        permission.setName(name.toUpperCase()); // Dima majuscule (Convention)
-        return permissionRepository.save(permission);
+
+        Permission p = Permission
+                .builder()
+                .name(name.toUpperCase())
+                .build();
+
+        return permissionRepository.save(p);
     }
 
-    // 2. READ (All)
     public List<Permission> getAllPermissions() {
         return permissionRepository.findAll();
     }
 
-    // 3. UPDATE
-    public Permission updatePermission(String id, String newName) {
-        Permission permission = permissionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Permission non trouvée avec l'ID: " + id));
-
-        // Ila tbddlat smya, vérifie wach jdida déjà kayna
-        if (!permission.getName().equals(newName) && permissionRepository.existsByName(newName)) {
-            throw new IllegalArgumentException("Une autre permission porte déjà le nom '" + newName + "'.");
-        }
-
-        permission.setName(newName.toUpperCase());
-        return permissionRepository.save(permission);
-    }
-
-    // 4. DELETE
     public void deletePermission(String id) {
         if (!permissionRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Permission non trouvée avec l'ID: " + id);
+            throw new ResourceNotFoundException("Permission introuvable avec ID: " + id);
         }
-        // Note: Ila kant l-permission mliaza m3a chi role f 'role_permissions',
-        // khassk t-ms7i l-liaison 9bel (ola tkon dayra Cascade delete f DB).
-        // Bima ana drna native query f repo, JPA ma 3arfch l-liaison, donc DB li tkllf (Foreign Key).
         permissionRepository.deleteById(id);
     }
 
+    // --- 2. GESTION DES RÔLES (Assignation) ---
 
-    // ... imports
-
-    @Transactional // Mohim bzaf l @Modifying
     public void assignPermissionToRole(String roleName, String permissionId) {
-        // 1. Vérifier wach permission kayna
+        // A. Vérifier Role (Enum)
+        validateRole(roleName);
+
+        // B. Vérifier Permission
         if (!permissionRepository.existsById(permissionId)) {
             throw new ResourceNotFoundException("Permission introuvable avec ID: " + permissionId);
         }
 
-        // 2. Vérifier wach Role kayn (f Enum)
+        // C. Vérifier si déjà assigné (Optionnel, mais clean)
+        // (Hna gha n-twkklo 3la DB wla Native Query 'INSERT IGNORE' ila bghiti, 
+        // walakin Spring Data JPA @Modifying insert 3adi)
         try {
-            Role.valueOf(roleName); // Ila ma kanch ghadi y-lo7 IllegalArgumentException
-        } catch (IllegalArgumentException e) {
-            throw new ResourceNotFoundException("Role introuvable: " + roleName);
+            permissionRepository.addPermissionToRole(roleName, permissionId);
+        } catch (Exception e) {
+            log.warn("Permission déjà assignée ou erreur SQL: {}", e.getMessage());
+            // T9dri t-ignoré l'erreur ila kant "Duplicate key"
         }
-
-        // 3. Exécuter l'ajout
-        // (T9dri t-zidi try-catch hna 3la wed 'Duplicate Key' ila kant deja kayna)
-        permissionRepository.addPermissionToRole(roleName, permissionId);
     }
 
-    @Transactional
     public void unassignPermissionFromRole(String roleName, String permissionId) {
+        validateRole(roleName);
         permissionRepository.removePermissionFromRole(roleName, permissionId);
+    }
+
+    public List<Permission> getPermissionsByRole(String roleName) {
+        validateRole(roleName);
+        return permissionRepository.findAllByRoleName(roleName);
+    }
+
+    // Méthode helper bach n-vérifiw wach Role kayn f Enum
+    private void validateRole(String roleName) {
+        try {
+            Role.valueOf(roleName);
+        } catch (IllegalArgumentException e) {
+            throw new ResourceNotFoundException("Rôle introuvable: " + roleName);
+        }
     }
 }

@@ -1,21 +1,26 @@
 spring:
-  # Configuration de la base de données en mémoire H2 pour les tests
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
-    password: password
+    password: ""
+
   jpa:
-    # Utilisez 'create-drop' pour recréer le schéma à chaque test
     hibernate:
       ddl-auto: create-drop
-    show-sql: false # Désactiver les logs SQL pendant les tests
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect # Kay-goul l Spring
+    properties:
+      hibernate:
+        # 👇 HADI HIYA L-MOHIMA: Bach n-m7iw Postgres Dialect li jay mn main
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
 
-  # Désactiver Liquibase pendant les tests si H2 est utilisé pour un schéma éphémère
+  # Désactiver Liquibase
   liquibase:
     enabled: false
 
-  # Désactiver l'initialisation du service de mail (simuler)
+  # Config Mail pour Test
   mail:
     host: disabled.test.host
     port: 3000
@@ -29,4 +34,4 @@ spring:
             enable: false
 
 server:
-  port: 8089 # Port différent pour éviter les conflits
+  port: 8089

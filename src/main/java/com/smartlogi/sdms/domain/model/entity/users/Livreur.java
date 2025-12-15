@@ -47,10 +47,10 @@ public class Livreur extends BaseUser {
 
     // APRÈS (Correction) :
     // Mappé vers le champ "livreurCollecte" dans Colis.java
-    @OneToMany(mappedBy = "livreurCollecte" , fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "livreurCollecte" , fetch = FetchType.LAZY)
     private List<Colis> colisEnCollecte;
 
     // Mappé vers le champ "livreurLivraison" dans Colis.java
-    @OneToMany(mappedBy = "livreurLivraison" , fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "livreurLivraison" , fetch = FetchType.LAZY)
     private List<Colis> colisEnLivraison;
 }

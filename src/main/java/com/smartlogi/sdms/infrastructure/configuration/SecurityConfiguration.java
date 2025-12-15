@@ -14,18 +14,25 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.AuthenticationEntryPoint; // Import
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler; // Import
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableMethodSecurity // 👈 AJOUTER CETTE LIGNET
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;
+
+    // 👇 1. Injection dyal les handlers li sawbna
+    // (Spring ghadi y-lqahom hit drti fihom @Component wla @Bean)
+    private final AuthenticationEntryPoint authEntryPoint; // L 401 (Login naqess/ghalet)
+    private final AccessDeniedHandler accessDeniedHandler; // L 403 (Role naqess)
 
     @Bean
     public JWTAuthFilter jwtAuthFilter() {
@@ -38,7 +45,6 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // Vos règles existantes autorisent déjà /api/v1/auth/**
                         .requestMatchers(HttpMethod.OPTIONS, "/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(
@@ -58,23 +64,22 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
 
-                // --- 🔻 DÉBUT DE L'AJOUT POUR LE LOGOUT ---
+                // 👇 2. HNA FIN KAN-RBTU L-HANDLERS M3A SPRING SECURITY
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authEntryPoint) // Traitement dyal 401
+                        .accessDeniedHandler(accessDeniedHandler) // Traitement dyal 403
+                )
+
                 .logout(logout -> logout
-                        .logoutUrl("/api/v1/auth/logout") // 1. Définir l'URL de déconnexion
+                        .logoutUrl("/api/v1/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
-
-                            // 2. Nettoyer le contexte de sécurité pour cette requête
                             SecurityContextHolder.clearContext();
-
-                            // 3. Envoyer une réponse JSON claire au client
                             response.setStatus(HttpServletResponse.SC_OK);
                             response.setContentType("application/json");
                             response.getWriter().write("{\"message\": \"Déconnexion réussie.\"}");
                         })
                 );
-        // --- 🔺 FIN DE L'AJOUT ---
 
         return http.build();
     }
-
 }
