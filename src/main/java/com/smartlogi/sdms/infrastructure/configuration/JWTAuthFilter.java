@@ -81,6 +81,7 @@ public class JWTAuthFilter extends OncePerRequestFilter { // 🔹 plus de @Compo
         return path.matches("/api/v1/auth.*")
                 || path.matches("/v3/api-docs.*")
                 || path.matches("/swagger-ui.*")
-                || path.matches("/actuator/*");
+                || path.matches("/actuator/*")
+                || path.matches("/home");
     }
 }

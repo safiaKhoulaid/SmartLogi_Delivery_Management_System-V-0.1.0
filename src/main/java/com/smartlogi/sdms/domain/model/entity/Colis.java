@@ -32,6 +32,9 @@ public class Colis {
     @Column(name = "description")
     private String description;
 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private  Long  numero ;
+
     @Embedded
     private Poids poids;
 

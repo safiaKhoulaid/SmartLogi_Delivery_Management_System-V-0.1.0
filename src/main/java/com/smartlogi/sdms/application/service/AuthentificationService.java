@@ -8,6 +8,7 @@ import com.smartlogi.sdms.application.dto.user.UserRequestRegisterDTO;
 import com.smartlogi.sdms.domain.exception.UserAlreadyExistsException;
 import com.smartlogi.sdms.domain.model.entity.RefreshToken;
 import com.smartlogi.sdms.domain.model.entity.users.BaseUser;
+import com.smartlogi.sdms.domain.model.enums.Role;
 import com.smartlogi.sdms.domain.repository.BaseUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,21 +40,21 @@ public class AuthentificationService {
                         .password(passwordEncoder.encode(request.getPassword()))
                         .adresse(request.getAdresse())
                         .telephone(request.getTelephone())
-                        .role(request.getRole())
+                        .role(Role.USER)
                         .build();
 
-        // --- CORRECTION ---
         // 1. Récupérez l'entité sauvegardée (qui aura un ID)
         BaseUser savedUser = baseUserRepository.save(user);
 
         // 2. Passez l'entité sauvegardée au service JWT
         String jwt = jwtService.generateToken(savedUser);
-        // --- FIN CORRECTION ---
 
         return RegisterResponse.builder()
                 .message("Inscription réussie ! Veuillez vous connecter pour accéder à votre compte.")
+                .email(savedUser.getEmail())
                 .build();
     }
+
 
     public AuthentificationResponse authenticate(AuthentificationRequest request) {
 

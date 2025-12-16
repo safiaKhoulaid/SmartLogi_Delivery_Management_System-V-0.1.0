@@ -44,6 +44,5 @@ public class UserRequestRegisterDTO {
     @NotNull(message = "Adresse est require")
     private Adresse adresse;
 
-    @Enumerated
-    Role role;
+
 }

@@ -10,7 +10,7 @@ import com.smartlogi.sdms.application.service.JWTService;
 import com.smartlogi.sdms.application.service.RefreshTokenService;
 import com.smartlogi.sdms.domain.model.entity.RefreshToken; // Zedt hadi
 import com.smartlogi.sdms.domain.model.entity.users.BaseUser;
-import com.smartlogi.sdms.domain.model.enums.Role;
+
 import com.smartlogi.sdms.domain.repository.BaseUserRepository;
 import com.smartlogi.sdms.presentation.controller.AuthentificationController;
 import jakarta.validation.Validator;
@@ -82,7 +82,6 @@ class AuthentificationControllerTest {
         registerRequest.setPassword("password123");
         registerRequest.setNom("Test");
         registerRequest.setPrenom("User");
-        registerRequest.setRole(Role.USER);
 
         authResponse = AuthentificationResponse.builder().token("dummy.jwt.token").build();
 

@@ -28,7 +28,6 @@ class UserMapperTest {
         UserRequestRegisterDTO dto = new UserRequestRegisterDTO();
         dto.setPrenom("Test");
         dto.setNom("Client");
-        dto.setRole(Role.USER);
 
         // Act
         ClientExpediteur client = userMapper.toClientExpediteur(dto);

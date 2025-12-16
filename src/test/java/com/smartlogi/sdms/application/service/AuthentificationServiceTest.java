@@ -71,7 +71,6 @@ class AuthentificationServiceTest {
         registerDTO.setPrenom("TestUserPrenom");
         registerDTO.setEmail("test@smartlogi.com");
         registerDTO.setPassword("password123");
-        registerDTO.setRole(Role.USER);
         registerDTO.setAdresse(adresse);
         registerDTO.setTelephone(telephone);
 

@@ -1,81 +1,3 @@
-#spring:
-#  datasource:
-#    url: jdbc:postgresql://localhost:5432/smartlogi_db_v2
-#    username: postgres
-#    password: 1234
-#    driver-class-name: org.postgresql.Driver
-#
-#  jpa:
-#    hibernate:
-#      ddl-auto: none
-#    properties:
-#      hibernate:
-#        dialect: org.hibernate.dialect.PostgreSQLDialect
-#    show-sql: true
-#    open-in-view: false
-#
-#  liquibase:
-#    change-log: db/changelog/db.changelog-master.xml
-#
-#  security:
-#    user:
-#      name: admin
-#      password: 1234
-#
-#  mail:
-#    host: smtp.gmail.com
-#    port: 587
-#    username: safiakhoulaid11@gmail.com
-#    password: rzmbeusgvddkdoix
-#    properties:
-#      mail:
-#        smtp:
-#          auth: true
-#          starttls:
-#            enable: true
-#          ssl:
-#            trust: smtp.gmail.com
-#
-#  data:
-#    redis:
-#      host: redis   # hostname ديال service فـ docker-compose
-#      port: 6379
-#      password: ""
-#      ssl:
-#        enabled: false
-#      timeout: 60000
-#      lettuce:
-#        pool:
-#          max-active: 8
-#          max-idle: 8
-#          min-idle: 0
-#          max-wait: -1ms
-#
-#server:
-#  port: 8081
-#
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: health, info, prometheus
-#  endpoint:
-#    prometheus:
-#      enabled: true
-#  metrics:
-#    tags:
-#      application: my-spring-app
-#
-## ===== Configuration Swagger / Springdoc =====
-#springdoc:
-#  api-docs:
-#    path: /v1/api-docs
-#  swagger-ui:
-#    path: /swagger-ui.html
-#    operationsSorter: method
-#    defaultModelsExpandDepth: 1
-#    displayRequestDuration: true
-
 spring:
   application:
     name: sdms-api
@@ -99,23 +21,14 @@ spring:
           ssl:
             trust: smtp.gmail.com
 
-  # Config
+  # Config JPA
   jpa:
     open-in-view: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-# Configuration Swagger
-springdoc:
-  api-docs:
-    path: /v1/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
-    defaultModelsExpandDepth: 1
-    displayRequestDuration: true
-
+  # 👇 HNA FIN KHASSHA TKOUN (Malignya m3a jpa, mail, etc.)
   security:
     oauth2:
       client:
@@ -124,3 +37,14 @@ springdoc:
             client-id: 61172088660-h3c3gutkcb3nj04n2l6o07afqs77p9a2.apps.googleusercontent.com
             client-secret: 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
             scope: openid, profile, email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
+# Configuration Swagger (Bo7dha)
+springdoc:
+  api-docs:
+    path: /v1/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    defaultModelsExpandDepth: 1
+    displayRequestDuration: true

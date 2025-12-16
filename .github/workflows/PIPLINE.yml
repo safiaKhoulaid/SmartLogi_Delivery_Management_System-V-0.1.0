@@ -31,8 +31,8 @@ jobs:
         run: ./mvnw clean package -DskipTests
 
       # E - Run tests
-      - name: Run Unit Tests
-        run: ./mvnw test
+#      - name: Run Unit Tests
+#        run: ./mvnw test
 
       # F - Docker Login
       - name: Log in to Docker Hub

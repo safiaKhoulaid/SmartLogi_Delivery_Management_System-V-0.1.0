@@ -28,6 +28,7 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler ;
 
     // 👇 1. Injection dyal les handlers li sawbna
     // (Spring ghadi y-lqahom hit drti fihom @Component wla @Bean)
@@ -46,15 +47,12 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll() // Hna fin kayn OAuth2 callback
                         .requestMatchers(
                                 "/v1/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/swagger-ui/index.html**",
-                                "/swagger-ui/index.html**/**",
-                                "/actuator/**",
-                                "/api/v1/missions/create"
+                                "/actuator/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -63,13 +61,10 @@ public class SecurityConfiguration {
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
-
-                // 👇 2. HNA FIN KAN-RBTU L-HANDLERS M3A SPRING SECURITY
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(authEntryPoint) // Traitement dyal 401
-                        .accessDeniedHandler(accessDeniedHandler) // Traitement dyal 403
+                        .authenticationEntryPoint(authEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
                 )
-
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
@@ -78,8 +73,12 @@ public class SecurityConfiguration {
                             response.setContentType("application/json");
                             response.getWriter().write("{\"message\": \"Déconnexion réussie.\"}");
                         })
+                )
+             //    👇 HNA BLASSA S7I7A (Khrejna mn logout)
+                .oauth2Login(oauth2 -> oauth2
+                        //.defaultSuccessUrl("/home", true) // <-- HADI ANNULLIHA DB (choufi lteht)
+                        .successHandler(oAuth2LoginSuccessHandler) // <-- Zidi had l handler (choufi l étape jayya)
                 );
 
         return http.build();
-    }
-}
+    }}

@@ -14,4 +14,5 @@ import lombok.Setter;
 public class RegisterResponse {
 
     private String message;
+    private String email ;
 }
