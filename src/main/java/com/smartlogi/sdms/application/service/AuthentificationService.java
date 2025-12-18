@@ -95,36 +95,5 @@ public class AuthentificationService {
 
     }
 
-    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return;
-        }
-
-        jwt = authHeader.substring(7);
-
-        // 1. Blacklist Access Token (باش نحرقو التوكن الحالي)
-        BlackListToken blackListedToken = new BlackListToken(jwt);
-        blackListTokenRepository.save(blackListedToken);
-
-        // 2. Delete Refresh Token (باش نمنعوه يجدد التوكن)
-        try {
-            String userEmail = jwtService.extractUserEmail(jwt); // جبدنا الإيميل من التوكن
-
-            // كنقلبو على Refresh Token ديال هاد السيد فـ Redis
-            Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUsername(userEmail);
-
-            if (refreshToken.isPresent()) {
-                refreshTokenRepository.delete(refreshToken.get()); // مسحناه
-                log.info("Refresh Token supprimé pour l'utilisateur: {}", userEmail);
-            }
-        } catch (Exception e) {
-            log.error("Erreur lors de la suppression du refresh token", e);
-        }
-
-        // 3. Clear Context
-        SecurityContextHolder.clearContext();
-    }
 }

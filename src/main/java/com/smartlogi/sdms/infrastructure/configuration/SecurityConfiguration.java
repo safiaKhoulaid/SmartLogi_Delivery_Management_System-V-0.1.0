@@ -1,6 +1,8 @@
 package com.smartlogi.sdms.infrastructure.configuration;
 
 import com.smartlogi.sdms.application.service.JWTService;
+import com.smartlogi.sdms.application.service.LogoutService;
+import com.smartlogi.sdms.domain.repository.BlackListTokenRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +31,8 @@ public class SecurityConfiguration {
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler ;
+    private final LogoutService logoutService ;
+    private final BlackListTokenRepository blackListTokenRepository ;
 
     // 👇 1. Injection dyal les handlers li sawbna
     // (Spring ghadi y-lqahom hit drti fihom @Component wla @Bean)
@@ -37,7 +41,7 @@ public class SecurityConfiguration {
 
     @Bean
     public JWTAuthFilter jwtAuthFilter() {
-        return new JWTAuthFilter(jwtService, userDetailsService);
+        return new JWTAuthFilter(jwtService, userDetailsService , blackListTokenRepository);
     }
 
     @Bean
@@ -67,14 +71,15 @@ public class SecurityConfiguration {
                         .accessDeniedHandler(accessDeniedHandler)
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/api/v1/auth/logout")
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            SecurityContextHolder.clearContext();
-                            response.setStatus(HttpServletResponse.SC_OK);
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"message\": \"Déconnexion réussie.\"}");
-                        })
-                )
+                .logoutUrl("/api/v1/auth/logout")
+                .addLogoutHandler(logoutService) // ✅ هذا هو اللي كيدير Blacklist
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    SecurityContextHolder.clearContext();
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"message\": \"Déconnexion réussie.\"}");
+                })
+        )
              //    👇 HNA BLASSA S7I7A (Khrejna mn logout)
                 .oauth2Login(oauth2 -> oauth2
                         //.defaultSuccessUrl("/home", true) // <-- HADI ANNULLIHA DB (choufi lteht)

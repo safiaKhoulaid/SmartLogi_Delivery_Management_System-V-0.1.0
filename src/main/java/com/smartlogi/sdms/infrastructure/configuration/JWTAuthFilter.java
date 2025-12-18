@@ -1,6 +1,7 @@
 package com.smartlogi.sdms.infrastructure.configuration;
 
 import com.smartlogi.sdms.application.service.JWTService;
+import com.smartlogi.sdms.domain.repository.BlackListTokenRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -25,6 +26,7 @@ public class JWTAuthFilter extends OncePerRequestFilter { // 🔹 plus de @Compo
 
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;
+    private final BlackListTokenRepository blackListTokenRepository ;
 
     @Override
     protected void doFilterInternal(
@@ -45,7 +47,10 @@ public class JWTAuthFilter extends OncePerRequestFilter { // 🔹 plus de @Compo
 
             jwt = authHeader.substring(7);
             userEmail = jwtService.extractUserEmail(jwt);
-
+            if (blackListTokenRepository.existsById(jwt)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return; // 🛑 Stop l-filter hna
+            }
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
