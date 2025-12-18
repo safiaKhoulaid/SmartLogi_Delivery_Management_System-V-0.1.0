@@ -106,7 +106,7 @@ public class AuthentificationService {
         jwt = authHeader.substring(7);
 
         // 1. Blacklist Access Token (باش نحرقو التوكن الحالي)
-        BlackListToken blackListedToken =  BlackListToken.builder().accessToken(jwt).build();
+        BlackListToken blackListedToken = new BlackListToken(jwt);
         blackListTokenRepository.save(blackListedToken);
 
         // 2. Delete Refresh Token (باش نمنعوه يجدد التوكن)
