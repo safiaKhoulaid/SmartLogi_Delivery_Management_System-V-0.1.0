@@ -54,11 +54,11 @@ public class AuthentificationController {
         var user = baseUserRepository.findByEmail(token.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
 
-        // 3. Generi Access Token Jdid
         String newAccessToken = jwtService.generateToken(user);
 
-        // 4. Rddi Jawab
         return ResponseEntity.ok(new JwtResponse(newAccessToken, requestToken));
     }
+
+
 
 }
