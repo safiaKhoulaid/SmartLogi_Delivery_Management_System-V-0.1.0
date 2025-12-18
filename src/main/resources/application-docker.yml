@@ -15,7 +15,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # aw validation, 7san mn 'none' f docker
+      ddl-auto: validate # Only Liquibase manages schema
     show-sql: true
     properties:
       hibernate:
