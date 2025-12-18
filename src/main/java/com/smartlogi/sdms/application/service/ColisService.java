@@ -1,5 +1,6 @@
 package com.smartlogi.sdms.application.service;
 
+import com.smartlogi.sdms.application.dto.Email.EmailRequest;
 import com.smartlogi.sdms.application.dto.colis.ColisRequestDTO;
 import com.smartlogi.sdms.application.dto.colis.ColisResponseDTO;
 import com.smartlogi.sdms.application.dto.user.DestinataireRequestDTO;
@@ -9,20 +10,25 @@ import com.smartlogi.sdms.domain.model.entity.Colis;
 import com.smartlogi.sdms.domain.model.entity.Zone;
 import com.smartlogi.sdms.domain.model.entity.users.ClientExpediteur;
 import com.smartlogi.sdms.domain.model.entity.users.Destinataire;
+import com.smartlogi.sdms.domain.model.entity.users.Livreur;
 import com.smartlogi.sdms.domain.model.enums.PriorityColis;
 import com.smartlogi.sdms.domain.model.enums.StatusColis;
 import com.smartlogi.sdms.domain.repository.*;
-import jakarta.transaction.Transactional;
+import jakarta.mail.MessagingException;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -35,12 +41,13 @@ public class ColisService {
     private final ColisMapper colisMapper;
     private final ZoneRepository zoneRepository;
     private final ClientExpediteurRepository clientExpediteurRepository;
-    public final MissionRepository missionRepository;
+    private final MissionRepository missionRepository;
+    private final EmailService emailService;
+    private final LivreurRepository livreurRepository;
 
 
     @Transactional
-    @PreAuthorize("hasAuthority()")
-    public Colis createColis(ColisRequestDTO dto) {
+    public Colis createColis(ColisRequestDTO dto) throws MessagingException {
 
         log.info("Début de la création du colis pour l'expéditeur: {}", dto.getExpediteurId());
 
@@ -129,10 +136,21 @@ public class ColisService {
         // Enums (avec valeurs par défaut)
         colis.setStatut(StatusColis.CREE);
         colis.setPriorite(dto.getPriority() != null ? dto.getPriority() : PriorityColis.NORMALE);
-
+        colis.generateTrackingCode();
         Colis savedColis = colisRepository.save(colis);
         log.info("Colis créé avec succès. ID: {}", savedColis.getId());
+        Map<String, Object> variables = Map.of(
+                "name", destinataire.getFirstName(),
+                "message", expediteur.getFirstName() + expediteur.getLastName() + "vous evoyer un colis , voila le code pour suivre votre colis" + colis.getTrackingCode()
+        );
 
+        EmailRequest emailReq = EmailRequest.builder()
+                .to(destinataire.getEmail())
+                .subject("envois de colis")
+                .templateName("email-template.html")
+                .variables(variables)
+                .build();
+        emailService.sendEmail(emailReq);
         return savedColis;
     }
 
@@ -228,20 +246,52 @@ public class ColisService {
 
         Page<Colis> page = colisRepository.rechercheAvancee(statut, priorite, ville, description, expediteurId, pageable);
         return page.map(colisMapper::toColisResponseDTO);
-}
+    }
 
-public List<ColisResponseDTO> updateAllColisByLivreur (String idLivreur ){
+    public List<ColisResponseDTO> updateAllColisByLivreur(String idLivreur) {
         List<Colis> colisTemp = colisRepository.findAllByLivreurId(idLivreur);
-        for(Colis colis : colisTemp){
+        for (Colis colis : colisTemp) {
             colis.setStatut(StatusColis.CREE);
             colisRepository.save(colis);
         }
         return colisTemp.stream().map(colisMapper::toColisResponseDTO).toList();
 
 
+    }
 
+    @Transactional(readOnly = true) // Lecture seule pour la performance
+    public ColisResponseDTO suivreColis(String trackingCode) {
+        log.info("Recherche du colis avec le code de suivi : {}", trackingCode);
+
+        Colis colis = colisRepository.findByTrackingCode(trackingCode)
+                .orElseThrow(() -> {
+                    log.warn("Colis introuvable pour le code : {}", trackingCode);
+                    return new ResourceNotFoundException("Colis", "code de suivi", trackingCode);
+                });
+
+        return colisMapper.toColisResponseDTO(colis);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<ColisResponseDTO> getColisForAuthenticatedLivreur() {
+        // 1. Récupérer l'email de l'utilisateur connecté
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+        log.info("Récupération des colis pour le livreur connecté : {}", currentEmail);
+
+        // 2. Trouver le livreur en base
+        Livreur livreur = livreurRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Livreur non trouvé avec l'email : " + currentEmail));
+
+        // 3. Récupérer les colis assignés (Collecte OU Livraison)
+        // Note : On utilise la méthode findAllByLivreurId que tu as déjà dans ColisRepository
+        List<Colis> colisAssignes = colisRepository.findAllByLivreurId(livreur.getId());
+
+        // 4. Mapper en DTO
+        return colisAssignes.stream()
+                .map(colisMapper::toColisResponseDTO)
+                .toList();
+    }
 }
 
-
-
-}

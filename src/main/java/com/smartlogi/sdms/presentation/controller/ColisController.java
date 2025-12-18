@@ -7,6 +7,7 @@ import com.smartlogi.sdms.application.service.ColisService;
 import com.smartlogi.sdms.domain.model.entity.Colis;
 import com.smartlogi.sdms.domain.model.enums.PriorityColis;
 import com.smartlogi.sdms.domain.model.enums.StatusColis;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -15,7 +16,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
 
 
 @Slf4j
@@ -29,7 +34,7 @@ public class ColisController {
     private final ColisMapper colisMapper;
 
     @PostMapping()
-    public ResponseEntity<ColisResponseDTO> createColis(@RequestBody ColisRequestDTO colisRequestDTO) {
+    public ResponseEntity<ColisResponseDTO> createColis(@RequestBody ColisRequestDTO colisRequestDTO) throws MessagingException {
         log.info("Requête POST /api/v1/colis reçue.");
         Colis colis = colisService.createColis(colisRequestDTO);
         ColisResponseDTO responseDTO = colisMapper.toColisResponseDTO(colis);
@@ -74,5 +79,27 @@ public class ColisController {
     public ResponseEntity<Page<ColisResponseDTO>> search(@RequestParam(required = false) StatusColis statut, @RequestParam(required = false) PriorityColis priorite, @RequestParam(required = false) String ville, @RequestParam(required = false) String description, @RequestParam(required = false) String expediteurId, @PageableDefault(size = 10, sort = "dateCreation", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ColisResponseDTO> result = colisService.searchColisSimple(statut, priorite, ville, description, expediteurId, pageable);
         return ResponseEntity.ok(result);
+    }
+
+
+    @GetMapping("/suivi/{trackingCode}")
+    public ResponseEntity<ColisResponseDTO> suivreLeColis(@PathVariable String trackingCode) {
+        log.info("Requête de suivi pour le code : {}", trackingCode);
+        ColisResponseDTO response = colisService.suivreColis(trackingCode);
+        return ResponseEntity.ok(response);
+    }
+
+    // ... imports
+
+    // 👇 AJOUTE CET ENDPOINT
+    @GetMapping("/mes-colis")
+    @PreAuthorize("hasAuthority('LIVREUR') or hasRole('LIVREUR')") // Sécurité renforcée
+    public ResponseEntity<List<ColisResponseDTO>> getMesColis() {
+
+        List<ColisResponseDTO> mesColis = colisService.getColisForAuthenticatedLivreur();
+        if (mesColis == null) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+        return ResponseEntity.ok(mesColis);
     }
 }

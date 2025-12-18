@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: spring-app
+    ports:
+      - "8080:8080"
+    environment:
+      # 👇 CORRECTION: Alignement parfait des tirets
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/smartlogi_db_v2
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+
+        # 2. 👇 الحل السحري لمشكل Liquibase
+        # خاصنا نقولو لـ Liquibase صراحةً: "سير لنفس لاباز، ما تقلبش فبلاصة خرى"
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://db:5432/smartlogi_db_v2
+      - SPRING_LIQUIBASE_USER=postgres
+      - SPRING_LIQUIBASE_PASSWORD=1234
+
+        # 3. كنفعلو البروفايل 'docker' باش يقرا داك الفيشي (احتياطاً)
+      - SPRING_PROFILES_ACTIVE=docker
+
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: app-postgres
+    environment:
+      POSTGRES_DB: smartlogi_db_v2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # --- MONITORING (Prometheus & Grafana) ---
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      # 👇 CORRECTION: Chemin standard interne (ne pas changer)
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - app
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  # --- LOGGING (ELK Stack) ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.9.0
+    container_name: logstash
+    volumes:
+      # 👇 CORRECTION: Chemin standard pour le pipeline Logstash
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5000:5000"
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  # --- QUALITÉ DE CODE (SonarQube) ---
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar
+    volumes:
+      - sonar_data:/opt/sonarqube/data
+      - sonar_extensions:/opt/sonarqube/extensions
+      - sonar_logs:/opt/sonarqube/logs
+    depends_on:
+      - sonar-db
+
+  sonar-db:
+    image: postgres:15
+    container_name: sonar-postgres
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
+    volumes:
+      - sonar_db_data:/var/lib/postgresql/data
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+volumes:
+  postgres_data:
+  sonar_data:
+  sonar_extensions:
+  sonar_logs:
+  sonar_db_data:

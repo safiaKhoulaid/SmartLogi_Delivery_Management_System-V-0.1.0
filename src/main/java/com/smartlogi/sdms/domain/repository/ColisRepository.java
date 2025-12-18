@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public interface ColisRepository extends JpaRepository<Colis, String>, JpaSpecificationExecutor<Colis> {
 
-    Page<Colis> findAllByClientExpediteurId(@Param("idClient") String idClient , Pageable pageable);
+    Page<Colis> findAllByClientExpediteurId(@Param("idClient") String idClient, Pageable pageable);
 
     @Query("SELECT c FROM Colis c JOIN FETCH c.destinataire WHERE c.clientExpediteur.id = :clientId")
     List<Colis> findByClientExpediteur_Id(String clientId);
@@ -43,4 +43,6 @@ public interface ColisRepository extends JpaRepository<Colis, String>, JpaSpecif
     // CORRECTION: Remplacer le Derived Query invalide par un JPQL explicite
     @Query("SELECT c FROM Colis c WHERE c.livreurCollecte.id = :idLivreur OR c.livreurLivraison.id = :idLivreur")
     List<Colis> findAllByLivreurId(@Param("idLivreur") String idLivreur);
+
+    Optional<Colis> findByTrackingCode(String trackingCode);
 }

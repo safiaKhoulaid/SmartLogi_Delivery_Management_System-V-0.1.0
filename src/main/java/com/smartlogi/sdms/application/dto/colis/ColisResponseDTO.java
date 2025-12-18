@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder(access = lombok.AccessLevel.PUBLIC)public class ColisResponseDTO {
 
     // --- Identification du Colis ---
+    private String message;
     private String id; // Type String, car c'est un UUID généré
     private String description;
     private LocalDateTime dateCreation;

@@ -4,10 +4,6 @@ import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-
-import java.util.Objects;
-
 
 @Embeddable
 public record Adresse(
@@ -24,7 +20,6 @@ public record Adresse(
         @Size(max = 30, message = "Le nom de la ville ne doit pas dépasser 30 caractères.")
         String ville,
 
-        // Code postal marocain typique de CINQ chiffres.
         @Pattern(regexp = "^\\d{5}$", message = "Code postal invalide (doit contenir 5 chiffres).")
         @NotBlank(message = "Le code postal est obligatoire.")
         @Size(max = 5, message = "Le code postal ne doit pas dépasser 5 caractères.")
@@ -34,50 +29,52 @@ public record Adresse(
         @Size(max = 20, message = "Le nom du pays ne doit pas dépasser 20 caractères.")
         String pays,
 
-        // ⬇️ --- AJOUTS OBLIGATOIRES --- ⬇️
         Double latitude,
         Double longitude
-        // ⬆️ --- FIN DES AJOUTS --- ⬆️
-
 ) {
     /**
-     * Constructeur canonique explicite pour la normalisation et la validation des invariants.
+     * Constructeur Compact : On tolère les NULL pour que Hibernate ne plante pas.
      */
     public Adresse {
+        // حيدنا Objects.requireNonNull باش Hibernate يقدر يشارجي الداتا القديمة
 
-        // 1. Validation des invariants
-        Objects.requireNonNull(numero, "Le numéro de rue ne peut être nul.");
-        Objects.requireNonNull(rue, "Le nom de la rue ne peut être nul.");
-        Objects.requireNonNull(ville, "Le nom de la ville ne peut être nul.");
-        Objects.requireNonNull(codePostal, "Le code postal ne peut être nul.");
+        // 1. Normalisation (Safe Trim & Uppercase)
+        if (numero != null) {
+            numero = numero.trim();
+        }
 
-        // 2. Normalisation des champs
-        numero = numero.trim();
-        rue = rue.trim().toUpperCase();
-        ville = ville.trim().toUpperCase();
-        codePostal = codePostal.trim();
+        if (rue != null) {
+            rue = rue.trim().toUpperCase();
+        }
+
+        if (ville != null) {
+            ville = ville.trim().toUpperCase();
+        }
+
+        if (codePostal != null) {
+            codePostal = codePostal.trim();
+        }
 
         if (pays == null || pays.isBlank()) {
-            pays = "MAROC"; // Valeur par défaut
+            pays = "MAROC"; // Default
         } else {
             pays = pays.trim().toUpperCase();
         }
 
-        // Les champs latitude et longitude sont assignés implicitement (pas de trim/uppercase)
+        // latitude & longitude كيبقاو كيف ما جاو
     }
 
-    /**
-     * Constructeur alternatif pour créer une Adresse sans coordonnées (elles seront null).
-     */
+    // Constructeur alternatif (Reste inchangé)
     public Adresse(String numero, String rue, String ville, String codePostal, String pays) {
         this(numero, rue, ville, codePostal, pays, null, null);
     }
 
-    /**
-     * Retourne une représentation lisible de l'adresse.
-     * @return L'adresse formatée.
-     */
     public String getAdresseComplete() {
-        return String.format("%s %s, %s %s, %s", numero, rue, ville, codePostal, pays);
+        return String.format("%s %s, %s %s, %s",
+                numero != null ? numero : "",
+                rue != null ? rue : "",
+                ville != null ? ville : "",
+                codePostal != null ? codePostal : "",
+                pays);
     }
 }

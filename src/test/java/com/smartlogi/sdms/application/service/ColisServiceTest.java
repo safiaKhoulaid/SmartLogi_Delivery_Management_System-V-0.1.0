@@ -15,6 +15,7 @@ import com.smartlogi.sdms.domain.model.vo.Adresse;
 import com.smartlogi.sdms.domain.model.vo.Poids;
 import com.smartlogi.sdms.domain.model.enums.UnitePoids;
 import com.smartlogi.sdms.domain.repository.*;
+import jakarta.mail.MessagingException;
 import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -114,7 +115,7 @@ class ColisServiceTest {
     // --- Tests pour createColis ---
 
     @Test
-    void testCreateColis_WithNewDestinataire_ShouldSaveColis() {
+    void testCreateColis_WithNewDestinataire_ShouldSaveColis() throws MessagingException {
         // Arrange
         when(baseUserService.findClientExpediteurById("expediteur-123")).thenReturn(Optional.of(expediteur));
         when(destinataireRepository.findByEmail(anyString())).thenReturn(Optional.empty());
@@ -141,7 +142,7 @@ class ColisServiceTest {
     }
 
     @Test
-    void testCreateColis_WithExistingDestinataire_ShouldUseExisting() {
+    void testCreateColis_WithExistingDestinataire_ShouldUseExisting() throws MessagingException {
         // Arrange
         requestDTO.setDestinataireInfo(null);
         requestDTO.setDestinataireId("destinataire-456");
@@ -222,7 +223,7 @@ class ColisServiceTest {
     }
 
     @Test
-    void testCreateColis_WithNewInfo_ShouldReuseExistingDestinataireByEmail() {
+    void testCreateColis_WithNewInfo_ShouldReuseExistingDestinataireByEmail() throws MessagingException {
         // Arrange
         // requestDTO (via setUp) contient destinataireInfo
         when(baseUserService.findClientExpediteurById("expediteur-123")).thenReturn(Optional.of(expediteur));

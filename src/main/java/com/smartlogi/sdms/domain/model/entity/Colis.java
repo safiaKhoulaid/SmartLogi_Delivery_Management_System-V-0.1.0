@@ -32,8 +32,17 @@ public class Colis {
     @Column(name = "description")
     private String description;
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Long  numero ;
+    @Column(name = "tracking_code", unique = true)
+    private String trackingCode;
+
+
+    public void generateTrackingCode() {
+        if (this.trackingCode == null) {
+
+
+            this.trackingCode = "MA-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        }
+    }
 
     @Embedded
     private Poids poids;
