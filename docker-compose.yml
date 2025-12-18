@@ -7,20 +7,20 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      # 1. Sta3mli had les noms exacts d Spring bach i-overridey l-properties
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/smartlogi_db_v2
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=1234
+      # Use Standard Spring Variables
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/smartlogi_db_v2
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: "1234"
 
-      # 2. Hibernate/Liquibase coordination
-      # Liquibase i-bni l-base, u Hibernate ghir i-checky (validate)
-      - SPRING_LIQUIBASE_ENABLED=true
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      # Hibernate & Liquibase coordination
+      SPRING_LIQUIBASE_ENABLED: "true"
+      # IMPORTANT: Diri 'none' hna bach tkhalli Liquibase howa l-m3llem
+      # hit 'validate' ghat-planti lik ila kan l-farq f 'depot_attitide'
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
 
-      # 3. Redis config (Ila konti khdama bih)
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
     depends_on:
       db:
         condition: service_healthy
@@ -28,24 +28,23 @@ services:
         condition: service_started
 
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: postgres-db
     restart: always
     environment:
       POSTGRES_DB: smartlogi_db_v2
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
-    # 4. 7iyedi l-ports hna bach 7ed may-dkhul l base mn AWS (Sécurité)
+      POSTGRES_PASSWORD: "1234"
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d smartlogi_db_v2"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
-    image: redis:7
+    image: redis:7-alpine
     restart: always
 
 volumes:
