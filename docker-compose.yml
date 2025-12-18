@@ -6,17 +6,26 @@ services:
     restart: always
     ports:
       - "8080:8080"
-      # - "5005:5005"  <-- 7iyedto 3la wed sécurité
     environment:
-      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
-      SPRING_LIQUIBASE_ENABLED: true
-      SPRING_PROFILES_ACTIVE: prod
-      DATABASE_URL: jdbc:postgresql://db:5432/smartlogi_db_v2
-      DATABASE_USERNAME: postgres
-      DATABASE_PASSWORD: 1234
+      - SPRING_PROFILES_ACTIVE=prod
+      # 1. Sta3mli had les noms exacts d Spring bach i-overridey l-properties
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/smartlogi_db_v2
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+
+      # 2. Hibernate/Liquibase coordination
+      # Liquibase i-bni l-base, u Hibernate ghir i-checky (validate)
+      - SPRING_LIQUIBASE_ENABLED=true
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+
+      # 3. Redis config (Ila konti khdama bih)
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   db:
     image: postgres:15
@@ -26,10 +35,14 @@ services:
       POSTGRES_DB: smartlogi_db_v2
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
-    ports:
-      - "5432:5432" # Khalih ghir ila konti bagha accès mn barra
+    # 4. 7iyedi l-ports hna bach 7ed may-dkhul l base mn AWS (Sécurité)
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d smartlogi_db_v2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7
