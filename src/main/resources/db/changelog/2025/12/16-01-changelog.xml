@@ -7,9 +7,11 @@
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
     <changeSet id="1765898860326-1" author="ycode">
-        <dropColumn tableName="colis" >
-            <column name="tracking_code" type="VARCHAR(255)"/>
-        </dropColumn>
+            <preConditions onFail="MARK_RAN">
+                <columnExists tableName="colis" columnName="tracking_code"/>
+            </preConditions>
+
+            <dropColumn tableName="colis" columnName="tracking_code"/>
     </changeSet>
     <changeSet id="1765898739547-4" author="ycode">
         <addColumn tableName="colis">

@@ -34,6 +34,7 @@ public class ColisController {
     private final ColisMapper colisMapper;
 
     @PostMapping()
+    @PreAuthorize("hasAuthority('COLIS_CREATE')")
     public ResponseEntity<ColisResponseDTO> createColis(@RequestBody ColisRequestDTO colisRequestDTO) throws MessagingException {
         log.info("Requête POST /api/v1/colis reçue.");
         Colis colis = colisService.createColis(colisRequestDTO);
@@ -44,7 +45,7 @@ public class ColisController {
 
 
     @GetMapping("/client/{idClient}")
-//    @PreAuthorize("authentication.principal.id == #idClient or hasAuthority('GESTIONNAIRE')")
+    @PreAuthorize("hasAuthority('COLIS_READ')")
     public ResponseEntity<Page<ColisResponseDTO>> getAllColisByClientExpediteurId(@PathVariable("idClient") String idClient, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         log.info("Requête GET /api/v1/colis/client/{} reçue | Page: {}, Taille: {}", idClient, pageable.getPageNumber(), pageable.getPageSize()); // 👈 AJOUT

@@ -1,14 +1,25 @@
 spring:
   datasource:
-    url: jdbc:postgresql://db-1:5432/smartlogi_db_v2
+    # ⚠️ "db" howa smiyat service f docker-compose, machi "db-1"
+    url: jdbc:postgresql://db:5432/smartlogi_db_v2
     username: postgres
     password: 1234
     driver-class-name: org.postgresql.Driver
 
+  # ✅ Zidi had partie d Liquibase bach maymchich l localhost
+  liquibase:
+    url: jdbc:postgresql://db:5432/smartlogi_db_v2
+    user: postgres
+    password: 1234
+    change-log: classpath:db/changelog/db.changelog-master.xml # aw chemin li 3ndk
+
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update # aw validation, 7san mn 'none' f docker
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
   data:
     redis:

@@ -1,0 +1,29 @@
+spring:
+  # 1. Configuration Database (Docker Service Name)
+  datasource:
+    url: jdbc:postgresql://db:5432/smartlogi_db_v2
+    username: postgres
+    password: 1234 # Aw sta3mli ${DATABASE_PASSWORD} ila knti mkhbyaha f Env
+    driver-class-name: org.postgresql.Driver
+
+  # 2. Liquibase (Kaybqa howa howa, walakin kay-executer f Prod DB)
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+
+  # 3. JPA / Hibernate (Sécurité)
+  jpa:
+    show-sql: false  # ❌ Kanseddo SQL logs f Prod (bach nqssu bruit)
+    hibernate:
+      ddl-auto: validate # ⚠️ Mohim: Hibernate ghir kitchkki, ma kimseh ma kizid walo. Liquibase howa l-m3llem.
+    properties:
+      hibernate:
+        format_sql: false
+
+# 4. Logging (Nqssu l-hdra zayda)
+logging:
+  level:
+    root: INFO
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    com.smartlogi: INFO # Ghir les logs dialek li ybano

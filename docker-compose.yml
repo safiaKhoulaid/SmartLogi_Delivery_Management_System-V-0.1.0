@@ -1,27 +1,22 @@
-version: "3.9"
-
 services:
   app:
     image: safiakhoulaid/smartlogi-backend:latest
     container_name: spring-app
     pull_policy: always
     restart: always
-
     ports:
       - "8080:8080"
-      - "5005:5005"
-
+      # - "5005:5005"  <-- 7iyedto 3la wed sécurité
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      DATABASE_URL: jdbc:postgresql://db-1:5432/smartlogi_db_v2
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: jdbc:postgresql://db:5432/smartlogi_db_v2
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: 1234
-
     depends_on:
-      - db-1
+      - db
       - redis
 
-  db-1:
+  db:
     image: postgres:15
     container_name: postgres-db
     restart: always
@@ -30,99 +25,13 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
     ports:
-      - "5432:5432"
+      - "5432:5432" # Khalih ghir ila konti bagha accès mn barra
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
 
   redis:
     image: redis:7
     restart: always
-    # ما نفتحوش port إلا للضرورة
-
-
-
-
-#  prometheus:
-#    image: prom/prometheus:latest
-#    container_name: prometheus
-#    ports:
-#      - "9090:9090"
-#    volumes:
-#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-#    depends_on:
-#      - app
-#
-#  grafana:
-#    image: grafana/grafana
-#    container_name: grafana
-#    ports:
-#      - "3000:3000"
-#    depends_on:
-#      - prometheus
-#
-#  elasticsearch:
-#    image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
-#    container_name: elasticsearch_springboot
-#    environment:
-#      - bootstrap.memory_lock=true
-#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-#      - "discovery.type=single-node"
-#      - xpack.security.enabled=false
-#    ports:
-#      - "9200:9200"
-#    volumes:
-#      - elasticsearch_data:/usr/share/elasticsearch/data
-#    networks:
-#      - elastic
-#
-#  kibana:
-#    image: docker.elastic.co/kibana/kibana:8.3.3
-#    container_name: kibana_springboot
-#    ports:
-#      - "5601:5601"
-#    environment:
-#      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-#    depends_on:
-#      - elasticsearch
-#    networks:
-#      - elastic
-#
-#  logstash:
-#    image: docker.elastic.co/logstash/logstash:8.3.3
-#    container_name: logstash_springboot
-#    volumes:
-#      - ./logstash/pipeline:/usr/share/logstash/pipeline:rw
-#    ports:
-#      - "5044:5044"
-#      - "5000:5000/tcp"
-#      - "5000:5000/udp"
-#      - "9600:9600"
-#    environment:
-#      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
-#    depends_on:
-#      - elasticsearch
-#    networks:
-#      - elastic
-#
-#  sonarqube:
-#    image: sonarqube:latest
-#    container_name: sonarqube
-#    ports:
-#      - "9000:9000"
-#    environment:
-#      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
-#    volumes:
-#      - sonarqube_data:/opt/sonarqube/data
-#      - sonarqube_logs:/opt/sonarqube/logs
-#      - sonarqube_extensions:/opt/sonarqube/extensions
-#
-#networks:
-#  elastic:
-#    driver: bridge
 
 volumes:
-  postgres_data_prod:    # <--- HADI LI KANT NAQSA
-#  elasticsearch_data:
-#  sonarqube_data:
-#  sonarqube_logs:
-#  sonarqube_extensions:
+  postgres_data_prod:
