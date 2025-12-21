@@ -48,3 +48,9 @@ springdoc:
     operationsSorter: method
     defaultModelsExpandDepth: 1
     displayRequestDuration: true
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET:e41cd8d26ff1ee82eb8d271b14f247f7c24ff9189aca42f6f3c841f4bb7c60da}
+      expiration: 86400000

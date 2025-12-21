@@ -1,28 +1,44 @@
 package com.smartlogi.sdms.application.service;
 
+// 1. DTOs
 import com.smartlogi.sdms.application.dto.Email.EmailRequest;
 import com.smartlogi.sdms.application.dto.colis.ColisRequestDTO;
 import com.smartlogi.sdms.application.dto.colis.ColisResponseDTO;
 import com.smartlogi.sdms.application.dto.user.DestinataireRequestDTO;
+
+// 2. Mappers & Entities
 import com.smartlogi.sdms.application.mapper.ColisMapper;
-import com.smartlogi.sdms.domain.exception.ResourceNotFoundException;
 import com.smartlogi.sdms.domain.model.entity.Colis;
 import com.smartlogi.sdms.domain.model.entity.Zone;
 import com.smartlogi.sdms.domain.model.entity.users.ClientExpediteur;
 import com.smartlogi.sdms.domain.model.entity.users.Destinataire;
 import com.smartlogi.sdms.domain.model.entity.users.Livreur;
+
+// 3. Enums
 import com.smartlogi.sdms.domain.model.enums.PriorityColis;
 import com.smartlogi.sdms.domain.model.enums.StatusColis;
-import com.smartlogi.sdms.domain.repository.*;
-import jakarta.mail.MessagingException;
+
+// 4. Repositories
+import com.smartlogi.sdms.domain.repository.ClientExpediteurRepository;
+import com.smartlogi.sdms.domain.repository.ColisRepository;
+import com.smartlogi.sdms.domain.repository.DestinataireRepository;
+import com.smartlogi.sdms.domain.repository.LivreurRepository;
+import com.smartlogi.sdms.domain.repository.MissionRepository;
+import com.smartlogi.sdms.domain.repository.ZoneRepository;
+
+// 5. Exceptions
+import com.smartlogi.sdms.domain.exception.ResourceNotFoundException;
 import jakarta.validation.ValidationException;
+import jakarta.mail.MessagingException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+// 6. Spring & Lombok
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +53,7 @@ public class ColisService {
 
     private final ColisRepository colisRepository;
     private final DestinataireRepository destinataireRepository;
-    private final BaseUserService baseUserService;
+    private final DestinataireService destinataireService;
     private final ColisMapper colisMapper;
     private final ZoneRepository zoneRepository;
     private final ClientExpediteurRepository clientExpediteurRepository;
@@ -45,206 +61,174 @@ public class ColisService {
     private final EmailService emailService;
     private final LivreurRepository livreurRepository;
 
-
+    /**
+     * Création d'un colis avec gestion intelligente de l'expéditeur (Auth) et du destinataire.
+     */
     @Transactional
-    public Colis createColis(ColisRequestDTO dto) throws MessagingException {
+    public ColisResponseDTO createColis(ColisRequestDTO dto) throws MessagingException {
 
-        log.info("Début de la création du colis pour l'expéditeur: {}", dto.getExpediteurId());
+        log.info("Début du processus de création de colis...");
 
+        // =================================================================================
+        // 1. IDENTIFICATION DE L'EXPÉDITEUR (Gestionnaire vs Client) 🕵️‍♂️
+        // =================================================================================
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = auth.getName();
+
+        boolean isGestionnaire = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_GESTIONNAIRE") || a.getAuthority().equals("GESTIONNAIRE"));
+
+        ClientExpediteur expediteur;
+
+        if (isGestionnaire) {
+            // CAS GESTIONNAIRE : Il crée pour le compte d'un client
+            log.info("Utilisateur connecté identifié comme GESTIONNAIRE.");
+
+            if (dto.getExpediteurId() == null) {
+                throw new ValidationException("En tant que Gestionnaire, vous devez obligatoirement spécifier l'ID du client expéditeur.");
+            }
+
+            expediteur = clientExpediteurRepository.findById(dto.getExpediteurId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Client expéditeur introuvable avec l'ID : " + dto.getExpediteurId()));
+
+        } else {
+            // CAS CLIENT : Il crée pour lui-même (via son Token)
+            log.info("Utilisateur connecté identifié comme CLIENT (via Token).");
+
+            expediteur = clientExpediteurRepository.findByEmail(currentUserEmail)
+                    .orElseThrow(() -> new ResourceNotFoundException("Compte Client introuvable pour l'email : " + currentUserEmail));
+        }
+
+        log.info("Colis sera créé pour le client : {} {}", expediteur.getFirstName(), expediteur.getLastName());
+
+        // =================================================================================
+        // 2. GESTION DU DESTINATAIRE (Délégation au Service) 📦
+        // =================================================================================
         Destinataire destinataire;
-        if (dto.getExpediteurId() == null) {
-            log.warn("Tentative de création de colis sans expediteurId.");
-            throw new ValidationException("L'ID de l'expéditeur est obligatoire.");
-        }
 
-
-        // Validation Mutuellement Exclusive pour le Destinataire
-        if (dto.getDestinataireId() != null && dto.getDestinataireInfo() != null) {
-            log.warn("Validation échouée : destinataireId ({}) et destinataireInfo fournis en même temps.", dto.getDestinataireId());
-            throw new ValidationException("Vous devez spécifier un ID de destinataire EXISTANT OU de NOUVELLES informations, mais pas les deux.");
-        }
-
-        // --- 1. Gérer le destinataire ---
         if (dto.getDestinataireId() != null) {
-            log.info("Recherche du destinataire existant par ID: {}", dto.getDestinataireId());
+            // Cas A : ID fourni
+            log.info("Recherche du destinataire existant ID: {}", dto.getDestinataireId());
             destinataire = destinataireRepository.findById(dto.getDestinataireId())
-                    .orElseThrow(() -> {
-                        log.warn("Destinataire non trouvé avec ID: {}", dto.getDestinataireId());
-                        return new ResourceNotFoundException("Destinataire existant introuvable");
-                    });
+                    .orElseThrow(() -> new ResourceNotFoundException("Destinataire introuvable avec ID: " + dto.getDestinataireId()));
 
         } else if (dto.getDestinataireInfo() != null) {
-            log.info("Traitement d'un nouveau destinataire par email: {}", dto.getDestinataireInfo().getEmail());
-            DestinataireRequestDTO newDestinataireInfo = dto.getDestinataireInfo();
+            // Cas B : Nouvelles infos fournies -> On délègue la création/recherche
+            log.info("Traitement des informations du destinataire via DestinataireService.");
+            destinataire = destinataireService.findOrCreateDestinataire(dto.getDestinataireInfo(), expediteur);
 
-            // On doit récupérer l'expéditeur ici pour le passer au service de création de destinataire
-            ClientExpediteur expediteurPourDestinataire = baseUserService.findClientExpediteurById(dto.getExpediteurId())
-                    .orElseThrow(() -> {
-                        log.warn("Client expéditeur (pour création destinataire) non trouvé avec ID: {}", dto.getExpediteurId());
-                        return new ResourceNotFoundException("Client expéditeur introuvable.");
-                    });
-
-            Destinataire existingDestinataire = destinataireRepository.findByEmail(newDestinataireInfo.getEmail()).orElse(null);
-
-            if (existingDestinataire != null) {
-                log.info("Destinataire trouvé par email. Utilisation de l'ID: {}", existingDestinataire.getId());
-                destinataire = existingDestinataire;
-            } else {
-                log.info("Aucun destinataire existant trouvé. Création d'un nouveau destinataire...");
-                destinataire = baseUserService.createDestinataire(newDestinataireInfo, expediteurPourDestinataire);
-                log.info("Nouveau destinataire créé avec ID: {}", destinataire.getId());
-            }
         } else {
-            log.warn("Validation échouée : ni destinataireId ni destinataireInfo n'ont été fournis.");
-            throw new ValidationException("Les informations du destinataire sont obligatoires.");
+            throw new ValidationException("Vous devez fournir soit l'ID du destinataire, soit ses informations.");
         }
 
-        // --- 2. Récupérer les dépendances obligatoires ---
-
-        // A. Client Expéditeur (obligatoire)
-        ClientExpediteur expediteur = baseUserService.findClientExpediteurById(dto.getExpediteurId())
-                .orElseThrow(() -> {
-                    log.warn("Client expéditeur non trouvé avec ID: {}", dto.getExpediteurId());
-                    return new ResourceNotFoundException("Client expéditeur introuvable.");
-                });
-
-        // B. Définir la ville et trouver la zone (obligatoires)
+        // =================================================================================
+        // 3. DÉTERMINATION DE LA ZONE LOGISTIQUE 🗺️
+        // =================================================================================
         String villeDestination = destinataire.getAdresse().ville();
         String codePostal = destinataire.getAdresse().codePostal();
 
-        log.info("Recherche de la zone pour la ville: {} et code postal: {}", villeDestination, codePostal);
+        log.info("Recherche de zone pour : {} ({})", villeDestination, codePostal);
+
         Zone zoneDestination = zoneRepository.findByVilleAndCodePostal(villeDestination, codePostal)
-                .orElseThrow(() -> {
-                    log.warn("Zone logistique introuvable pour la ville: {} et code postal: {}", villeDestination, codePostal);
-                    return new ResourceNotFoundException("Zone logistique introuvable pour la ville: " + villeDestination);
-                });
-        log.info("Zone trouvée: {}", zoneDestination.getId());
+                .orElseThrow(() -> new ResourceNotFoundException("Aucune zone logistique configurée pour la ville : " + villeDestination));
 
-
-        // --- 3. Création et Mappage du Colis ---
+        // =================================================================================
+        // 4. CRÉATION ET SAUVEGARDE DU COLIS 💾
+        // =================================================================================
         Colis colis = colisMapper.toEntity(dto);
 
-        // Relations Many-to-One
-        colis.setDestinataire(destinataire);
+        // Relations
         colis.setClientExpediteur(expediteur);
+        colis.setDestinataire(destinataire);
         colis.setZoneDestination(zoneDestination);
 
-        // Champs dérivés
+        // Données métiers
         colis.setVilleDestination(villeDestination);
         colis.setDateCreation(dto.getDateCreation() != null ? dto.getDateCreation() : LocalDateTime.now());
-
-        // Enums (avec valeurs par défaut)
         colis.setStatut(StatusColis.CREE);
         colis.setPriorite(dto.getPriority() != null ? dto.getPriority() : PriorityColis.NORMALE);
-        colis.generateTrackingCode();
-        Colis savedColis = colisRepository.save(colis);
-        log.info("Colis créé avec succès. ID: {}", savedColis.getId());
-        Map<String, Object> variables = Map.of(
-                "name", destinataire.getFirstName(),
-                "message", expediteur.getFirstName() + expediteur.getLastName() + "vous evoyer un colis , voila le code pour suivre votre colis" + colis.getTrackingCode()
-        );
 
-        EmailRequest emailReq = EmailRequest.builder()
-                .to(destinataire.getEmail())
-                .subject("envois de colis")
-                .templateName("email-template.html")
-                .variables(variables)
-                .build();
-        emailService.sendEmail(emailReq);
-        return savedColis;
+        // Génération code de suivi
+        colis.generateTrackingCode();
+
+        Colis savedColis = colisRepository.save(colis);
+        log.info("✅ Colis créé avec succès. Tracking ID: {}", savedColis.getTrackingCode());
+
+        // =================================================================================
+        // 5. NOTIFICATION EMAIL 📧
+        // =================================================================================
+        try {
+            Map<String, Object> variables = Map.of(
+                    "name", destinataire.getFirstName(),
+                    "expediteurName", expediteur.getFirstName() + " " + expediteur.getLastName(),
+                    "trackingCode", colis.getTrackingCode(),
+                    "message", "Un nouveau colis vous a été envoyé."
+            );
+
+            EmailRequest emailReq = EmailRequest.builder()
+                    .to(destinataire.getEmail())
+                    .subject("📦 Vous avez un nouveau colis - SmartLogi")
+                    .templateName("email-template.html")
+                    .variables(variables)
+                    .build();
+
+            emailService.sendEmail(emailReq);
+        } catch (Exception e) {
+            log.warn("⚠️ Le colis est créé mais l'email n'a pas pu être envoyé : {}", e.getMessage());
+        }
+
+        return colisMapper.toColisResponseDTO(savedColis);
     }
 
     /**
      * Récupère tous les colis pour un client spécifique.
      */
     public Page<ColisResponseDTO> getColisByClientExpediteurId(String idClient, Pageable pageable) {
-
         log.info("Recherche des colis pour le client: {}, Page: {}, Taille: {}", idClient, pageable.getPageNumber(), pageable.getPageSize());
 
-        // --- 1. Vérification de l'existence du client ---
         if (!clientExpediteurRepository.existsById(idClient)) {
-            log.warn("Tentative de recherche de colis pour un client inexistant: {}", idClient);
-            throw new ResourceNotFoundException(
-                    "Impossible de trouver les colis car le ClientExpediteur avec l'ID " + idClient + " est introuvable."
-            );
+            throw new ResourceNotFoundException("Impossible de trouver les colis car le ClientExpediteur avec l'ID " + idClient + " est introuvable.");
         }
-
-        // --- 2. Requête ---
         Page<Colis> colisPage = colisRepository.findAllByClientExpediteurId(idClient, pageable);
-        log.info("Succès. {} colis trouvés pour le client: {}.", colisPage.getTotalElements(), idClient);
-
-
-        // --- 3. Mappage vers DTO ---
         return colisPage.map(colisMapper::toColisResponseDTO);
     }
 
+    /**
+     * Met à jour les informations d'un colis.
+     */
     @Transactional
     public ColisResponseDTO updateColis(String colisId, ColisRequestDTO dto) {
-        log.info("Tentative de mise à jour du colis ID: {}", colisId);
-
-        // 1. Trouver le colis existant
         Colis colis = colisRepository.findById(colisId)
-                .orElseThrow(() -> {
-                    log.warn("Mise à jour échouée : Colis non trouvé avec ID: {}", colisId);
-                    return new ResourceNotFoundException("Colis", "id", colisId);
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("Colis", "id", colisId));
 
-        // 2. Mettre à jour les champs autorisés
-        // Nous mettons à jour manuellement pour éviter d'écraser des champs
-        // comme l'expéditeur, le destinataire ou la zone via ce simple endpoint.
+        if (dto.getDescription() != null) colis.setDescription(dto.getDescription());
+        if (dto.getPoids() != null) colis.setPoids(dto.getPoids());
+        if (dto.getPriority() != null) colis.setPriorite(dto.getPriority());
+        if (dto.getStatus() != null) colis.setStatut(dto.getStatus());
 
-        if (dto.getDescription() != null) {
-            colis.setDescription(dto.getDescription());
-        }
-        if (dto.getPoids() != null) {
-            colis.setPoids(dto.getPoids());
-        }
-        if (dto.getPriority() != null) {
-            colis.setPriorite(dto.getPriority());
-        }
-        // Le statut est généralement mis à jour par d'autres processus (ex: MissionService)
-        if (dto.getStatus() != null) {
-            colis.setStatut(dto.getStatus());
-        }
-
-        // 3. Sauvegarder les modifications
         Colis updatedColis = colisRepository.save(colis);
-        log.info("Colis ID: {} mis à jour avec succès.", updatedColis.getId());
-
-        // 4. Retourner le DTO de réponse
         return colisMapper.toColisResponseDTO(updatedColis);
     }
 
+    /**
+     * Supprime un colis et ses missions associées.
+     */
     @Transactional
     public void deleteColis(String colisId) {
-        log.info("Tentative de suppression du colis ID: {}", colisId);
-
-        // 1. Vérifier si le colis existe
         if (!colisRepository.existsById(colisId)) {
-            log.warn("Suppression échouée : Colis non trouvé avec ID: {}", colisId);
             throw new ResourceNotFoundException("Colis", "id", colisId);
         }
-
-        // 2. Supprimer les enfants (Missions)
-        // Note : Les HistoriqueLivraison sont gérés par "CascadeType.ALL" sur l'entité Colis
-        log.info("Suppression des missions associées au colis ID: {}", colisId);
-        missionRepository.deleteAllByColisId(colisId); //
-
-        // 3. Supprimer le parent (Colis)
+        // Supprimer les missions liées avant de supprimer le colis
+        missionRepository.deleteAllByColisId(colisId);
         colisRepository.deleteById(colisId);
-        log.info("Colis ID: {} et missions associées supprimés avec succès.", colisId);
     }
 
-    @Transactional
-    public Page<ColisResponseDTO> searchColisSimple(
-            StatusColis statut,
-            PriorityColis priorite,
-            String ville,
-            String description,
-            String expediteurId,
-            Pageable pageable) {
-
-        Page<Colis> page = colisRepository.rechercheAvancee(statut, priorite, ville, description, expediteurId, pageable);
+    /**
+     * Recherche avancée pour l'admin/gestionnaire.
+     */
+    @Transactional(readOnly = true)
+    public Page<ColisResponseDTO> searchColisAdmin(StatusColis statut, PriorityColis priorite, String ville, String description, String trackingCode, String expediteurId, Pageable pageable) {
+        Page<Colis> page = colisRepository.rechercheAvancee(statut, priorite, ville, description, trackingCode, expediteurId, pageable);
         return page.map(colisMapper::toColisResponseDTO);
     }
 
@@ -255,43 +239,28 @@ public class ColisService {
             colisRepository.save(colis);
         }
         return colisTemp.stream().map(colisMapper::toColisResponseDTO).toList();
-
-
     }
 
-    @Transactional(readOnly = true) // Lecture seule pour la performance
+    @Transactional(readOnly = true)
     public ColisResponseDTO suivreColis(String trackingCode) {
-        log.info("Recherche du colis avec le code de suivi : {}", trackingCode);
-
         Colis colis = colisRepository.findByTrackingCode(trackingCode)
-                .orElseThrow(() -> {
-                    log.warn("Colis introuvable pour le code : {}", trackingCode);
-                    return new ResourceNotFoundException("Colis", "code de suivi", trackingCode);
-                });
-
+                .orElseThrow(() -> new ResourceNotFoundException("Colis", "code de suivi", trackingCode));
         return colisMapper.toColisResponseDTO(colis);
     }
 
-
+    /**
+     * Récupère les colis du livreur connecté.
+     */
     @Transactional(readOnly = true)
     public List<ColisResponseDTO> getColisForAuthenticatedLivreur() {
-        // 1. Récupérer l'email de l'utilisateur connecté
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentEmail = authentication.getName();
-        log.info("Récupération des colis pour le livreur connecté : {}", currentEmail);
 
-        // 2. Trouver le livreur en base
         Livreur livreur = livreurRepository.findByEmail(currentEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("Livreur non trouvé avec l'email : " + currentEmail));
 
-        // 3. Récupérer les colis assignés (Collecte OU Livraison)
-        // Note : On utilise la méthode findAllByLivreurId que tu as déjà dans ColisRepository
         List<Colis> colisAssignes = colisRepository.findAllByLivreurId(livreur.getId());
 
-        // 4. Mapper en DTO
-        return colisAssignes.stream()
-                .map(colisMapper::toColisResponseDTO)
-                .toList();
+        return colisAssignes.stream().map(colisMapper::toColisResponseDTO).toList();
     }
 }
-

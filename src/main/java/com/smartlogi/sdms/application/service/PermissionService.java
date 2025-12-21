@@ -23,13 +23,22 @@ public class PermissionService {
 
     // --- 1. CRUD Permissions  ---
     public Permission createPermission(String name) {
-        if (permissionRepository.existsByName(name)) {
-            throw new PermissionAlreadyExistsException("Permission '" + name + "' existe déjà.");
+        // 1. Standardiser la chaîne D'ABORD (koulchi majuscule)
+        String normalizedName = name.toUpperCase();
+
+        // 2. Vérifier b dik smiya li 9adity
+        if (permissionRepository.existsByName(normalizedName)) {
+            // Ila knti bagha t-bloqui l'creation:
+            throw new PermissionAlreadyExistsException("Permission '" + normalizedName + "' existe déjà.");
+
+            // 💡 TIP: Ila knti f DataInitializer, hsan lik diri 'return' bla exception:
+            // return permissionRepository.findByName(normalizedName).get();
         }
 
+        // 3. Creer objet
         Permission p = Permission
                 .builder()
-                .name(name.toUpperCase())
+                .name(normalizedName) // Huwa deja UpperCase db
                 .build();
 
         return permissionRepository.save(p);

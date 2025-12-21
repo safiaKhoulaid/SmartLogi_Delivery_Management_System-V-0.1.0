@@ -22,7 +22,6 @@ public class DelegatedAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        // Hna kan-goulou l Spring: "Sift had l-erreur l ControllerAdvice (GlobalExceptionHandler) dyali"
         resolver.resolveException(request, response, null, accessDeniedException);
     }
 }

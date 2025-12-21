@@ -5,8 +5,6 @@ import com.smartlogi.sdms.application.dto.user.DestinataireResponseDTO;
 import com.smartlogi.sdms.application.dto.user.UserRequestRegisterDTO;
 import com.smartlogi.sdms.domain.model.entity.users.ClientExpediteur;
 import com.smartlogi.sdms.domain.model.entity.users.Destinataire;
-import com.smartlogi.sdms.domain.model.enums.Role;
-import com.smartlogi.sdms.domain.model.vo.Adresse;
 import com.smartlogi.sdms.domain.model.vo.Telephone;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +55,6 @@ class UserMapperTest {
         assertEquals("Test", destinataire.getFirstName());
         assertEquals("Destinataire", destinataire.getLastName());
         assertEquals(tel, destinataire.getTelephone());
-        assertEquals(Role.USER, destinataire.getRole()); // Mappé par défaut
         assertNull(destinataire.getClientExpediteur()); // Ignoré
     }
 

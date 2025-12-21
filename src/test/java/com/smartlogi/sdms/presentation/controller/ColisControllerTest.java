@@ -106,7 +106,7 @@ class ColisControllerTest {
     @DisplayName("POST /api/v1/colis/create - Succès (201 CREATED)")
     void createColis_ShouldReturn201_WhenValid() throws Exception {
         // Arrange
-        when(colisService.createColis(any(ColisRequestDTO.class))).thenReturn(colisEntity);
+        when(colisService.createColis(any(ColisRequestDTO.class))).thenReturn(responseDTO);
         when(colisMapper.toColisResponseDTO(any(Colis.class))).thenReturn(responseDTO);
 
         // Act & Assert

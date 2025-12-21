@@ -22,7 +22,7 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 @Slf4j
-public class JWTAuthFilter extends OncePerRequestFilter { // 🔹 plus de @Component ici !
+public class JWTAuthFilter extends OncePerRequestFilter {
 
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;

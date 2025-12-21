@@ -1,8 +1,10 @@
 package com.smartlogi.sdms.application.service;
 
+import com.smartlogi.sdms.application.dto.user.DestinataireRequestDTO;
 import com.smartlogi.sdms.application.dto.user.DestinataireResponseDTO;
 import com.smartlogi.sdms.application.mapper.UserMapper;
 import com.smartlogi.sdms.domain.exception.ResourceNotFoundException;
+import com.smartlogi.sdms.domain.model.entity.users.ClientExpediteur;
 import com.smartlogi.sdms.domain.model.entity.users.Destinataire;
 import com.smartlogi.sdms.domain.repository.ClientExpediteurRepository;
 import com.smartlogi.sdms.domain.repository.DestinataireRepository;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,35 +23,81 @@ public class DestinataireService {
 
     private final DestinataireRepository destinataireRepository;
     private final ClientExpediteurRepository clientExpediteurRepository;
-    private final BaseUserService baseUserService;
     private final UserMapper userMapper;
 
-    /**
-     * Récupère une page de destinataires associés à un client expéditeur spécifique.
-     *
-     * @param clientId L'ID du ClientExpediteur
-     * @param pageable Les informations de pagination
-     * @return Une page de DestinataireResponseDTO
-     * @throws ResourceNotFoundException si le ClientExpediteur n'est pas trouvé
-     */
-
+    // --- CREATE ---
     @Transactional
-    public Page<DestinataireResponseDTO> getDestinatairesByClient(String clientId, Pageable pageable) {
-        log.info("Recherche des destinataires pour le client ID: {}", clientId);
+    public DestinataireResponseDTO createDestinataire(DestinataireRequestDTO dto) {
+        // 1. Récupérer l'utilisateur connecté (Expéditeur)
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        ClientExpediteur expediteur = (ClientExpediteur) clientExpediteurRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Expéditeur non trouvé."));
 
-        // 1. Vérifier que le client existe (Guard Clause)
+        // 2. Mapper et Lier
+        Destinataire destinataire = userMapper.toDestinataireEntity(dto);
+        destinataire.setClientExpediteur(expediteur);
+
+        // 3. Sauvegarder
+        Destinataire saved = destinataireRepository.save(destinataire);
+        return userMapper.toResponseDTO(saved);
+    }
+
+    // --- READ (Pageable) ---
+    public Page<DestinataireResponseDTO> getAllDestinataires(Pageable pageable) {
+        return destinataireRepository.findAll(pageable).map(userMapper::toResponseDTO);
+    }
+
+    public DestinataireResponseDTO getDestinataireById(String id) {
+        Destinataire dest = destinataireRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Destinataire", "id", id));
+        return userMapper.toResponseDTO(dest);
+    }
+
+    // --- UPDATE ---
+    @Transactional
+    public DestinataireResponseDTO updateDestinataire(String id, DestinataireRequestDTO dto) {
+        Destinataire existing = destinataireRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Destinataire", "id", id));
+
+        // Mise à jour des champs (Seulement ceux autorisés)
+        if (dto.getNom() != null) existing.setLastName(dto.getNom());
+        if (dto.getPrenom() != null) existing.setFirstName(dto.getPrenom());
+        if (dto.getTelephone() != null) existing.setTelephone(dto.getTelephone());
+        if (dto.getAdresse() != null) existing.setAdresse(dto.getAdresse());
+        if (dto.getEmail() != null) existing.setEmail(dto.getEmail());
+
+        Destinataire updated = destinataireRepository.save(existing);
+        return userMapper.toResponseDTO(updated);
+    }
+
+    // --- DELETE (Standard) ---
+    // Note: Pour un "Soft Delete", il faudrait ajouter un champ 'deleted' (boolean) dans l'entité BaseUser
+    @Transactional
+    public void deleteDestinataire(String id) {
+        if (!destinataireRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Destinataire", "id", id);
+        }
+        destinataireRepository.deleteById(id);
+    }
+
+    // --- Méthode existante ---
+    @Transactional(readOnly = true)
+    public Page<DestinataireResponseDTO> getDestinatairesByClient(String clientId, Pageable pageable) {
         if (!clientExpediteurRepository.existsById(clientId)) {
-            log.warn("ClientExpediteur non trouvé with ID: {}", clientId);
             throw new ResourceNotFoundException("ClientExpediteur", "id", clientId);
         }
+        return destinataireRepository.findAllByClientExpediteurId(clientId, pageable).map(userMapper::toResponseDTO);
+    }
 
-        // 2. Récupérer la page d'entités
-        // CORRECTION : Suppresion de .orElseThrow() car Page<> n'est pas un Optional
-        Page<Destinataire> destinatairesPage = destinataireRepository.findAllByClientExpediteurId(clientId, pageable);
-
-        log.info("{} destinataires trouvés pour le client ID: {}", destinatairesPage.getTotalElements(), clientId);
-
-        // 3. Mapper la page d'entités vers une page de DTOs
-        return destinatairesPage.map(userMapper::toResponseDTO);
+    @Transactional
+    public Destinataire findOrCreateDestinataire(DestinataireRequestDTO dto, ClientExpediteur expediteur) {
+        // 1. n9lbo 3lih b email (ila kan deja kayn nrdoh)
+        return destinataireRepository.findByEmail(dto.getEmail())
+                .orElseGet(() -> {
+                    // 2. ila makanch, n-creer wahd jdid
+                    Destinataire newDest = userMapper.toDestinataireEntity(dto);
+                    newDest.setClientExpediteur(expediteur); // Liaison m3a l'expediteur
+                    return destinataireRepository.save(newDest);
+                });
     }
 }

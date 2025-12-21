@@ -22,6 +22,8 @@ public class ClientExpediteur extends BaseUser {
     @Column(unique = true, nullable = false)
     private String codeClient;
 
+
+
     @OneToMany(mappedBy = "clientExpediteur",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE}, // Gère l'ajout/modification
             fetch = FetchType.LAZY)

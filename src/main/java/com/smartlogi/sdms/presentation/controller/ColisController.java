@@ -4,7 +4,6 @@ import com.smartlogi.sdms.application.dto.colis.ColisRequestDTO;
 import com.smartlogi.sdms.application.dto.colis.ColisResponseDTO;
 import com.smartlogi.sdms.application.mapper.ColisMapper;
 import com.smartlogi.sdms.application.service.ColisService;
-import com.smartlogi.sdms.domain.model.entity.Colis;
 import com.smartlogi.sdms.domain.model.enums.PriorityColis;
 import com.smartlogi.sdms.domain.model.enums.StatusColis;
 import jakarta.mail.MessagingException;
@@ -22,85 +21,123 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 
-
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/colis")
 @RequiredArgsConstructor
-
 public class ColisController {
 
     private final ColisService colisService;
     private final ColisMapper colisMapper;
 
-    @PostMapping()
+    // ========================================================================
+    // 1. GESTION DES COLIS (CRUD CLIENT & GESTIONNAIRE)
+    // ========================================================================
+
+    /**
+     * Création d'un nouveau colis.
+     * Accès : Clients uniquement (ceux qui ont la permission COLIS_CREATE).
+     */
+    @PostMapping
     @PreAuthorize("hasAuthority('COLIS_CREATE')")
     public ResponseEntity<ColisResponseDTO> createColis(@RequestBody ColisRequestDTO colisRequestDTO) throws MessagingException {
-        log.info("Requête POST /api/v1/colis reçue.");
-        Colis colis = colisService.createColis(colisRequestDTO);
-        ColisResponseDTO responseDTO = colisMapper.toColisResponseDTO(colis);
-        log.info("Colis créé avec ID: {}", responseDTO.getId());
-        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+        log.info("Création d'un colis demandée pour l'expéditeur : {}", colisRequestDTO.getExpediteurId());
+        ColisResponseDTO colis = colisService.createColis(colisRequestDTO);
+        colis.builder().message("la colis créer par succès").build();
+        return new ResponseEntity<>(colis, HttpStatus.CREATED);
     }
 
-
-    @GetMapping("/client/{idClient}")
-    @PreAuthorize("hasAuthority('COLIS_READ')")
-    public ResponseEntity<Page<ColisResponseDTO>> getAllColisByClientExpediteurId(@PathVariable("idClient") String idClient, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-
-        log.info("Requête GET /api/v1/colis/client/{} reçue | Page: {}, Taille: {}", idClient, pageable.getPageNumber(), pageable.getPageSize()); // 👈 AJOUT
-        Page<ColisResponseDTO> colisPage = colisService.getColisByClientExpediteurId(idClient, pageable);
-        log.info("Retour de {} colis pour le client {}", colisPage.getTotalElements(), idClient); // 👈 AJOUT
-        return ResponseEntity.ok(colisPage);
-    }
-
-    // --- 👇 AJOUT DES LOGS POUR UPDATE 👇 ---
+    /**
+     * Modification d'un colis existant.
+     * Accès : Gestionnaires (COLIS_UPDATE).
+     */
     @PutMapping("/{id}")
-//    @PreAuthorize("hasAuthority('GESTIONNAIRE')")
+    @PreAuthorize("hasAuthority('COLIS_UPDATE')")
     public ResponseEntity<ColisResponseDTO> updateColis(@PathVariable("id") String id, @RequestBody ColisRequestDTO requestDTO) {
-
-        log.info("Requête PUT /api/v1/colis/{} reçue", id); // 👈 AJOUT
+        log.info("Mise à jour du colis ID : {}", id);
         ColisResponseDTO response = colisService.updateColis(id, requestDTO);
-        log.info("Colis ID: {} mis à jour.", response.getId()); // 👈 AJOUT
         return ResponseEntity.ok(response);
     }
 
-    // --- 👇 AJOUT DES LOGS POUR DELETE 👇 ---
+    /**
+     * Suppression d'un colis.
+     * Accès : Admin uniquement (COLIS_DELETE).
+     */
     @DeleteMapping("/{id}")
-//    @PreAuthorize("hasAuthority('GESTIONNAIRE')")
+    @PreAuthorize("hasAuthority('COLIS_DELETE')")
     public ResponseEntity<Void> deleteColis(@PathVariable("id") String id) {
-
-        log.info("Requête DELETE /api/v1/colis/{} reçue", id); // 👈 AJOUT
+        log.warn("Suppression du colis ID : {}", id);
         colisService.deleteColis(id);
-        log.info("Colis ID: {} supprimé.", id); // 👈 AJOUT
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<Page<ColisResponseDTO>> search(@RequestParam(required = false) StatusColis statut, @RequestParam(required = false) PriorityColis priorite, @RequestParam(required = false) String ville, @RequestParam(required = false) String description, @RequestParam(required = false) String expediteurId, @PageableDefault(size = 10, sort = "dateCreation", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ColisResponseDTO> result = colisService.searchColisSimple(statut, priorite, ville, description, expediteurId, pageable);
+    // ========================================================================
+    // 2. RECHERCHE ET CONSULTATION (READ)
+    // ========================================================================
+
+    /**
+     * Récupérer les colis d'un client spécifique.
+     * Accès : Le Client lui-même ou le Gestionnaire.
+     */
+    @GetMapping("/client/{idClient}")
+    @PreAuthorize("hasAuthority('COLIS_READ')")
+    public ResponseEntity<Page<ColisResponseDTO>> getAllColisByClientExpediteurId(
+            @PathVariable("idClient") String idClient,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        log.debug("Récupération des colis pour le client : {}", idClient);
+        Page<ColisResponseDTO> colisPage = colisService.getColisByClientExpediteurId(idClient, pageable);
+        return ResponseEntity.ok(colisPage);
+    }
+
+    /**
+     * Recherche avancée globale (Filtres, Tri, Pagination).
+     * Accès : Admin et Gestionnaire.
+     */
+    @GetMapping("/search") // J'ai renommé /admin/all en /search c'est plus propre
+    @PreAuthorize("hasRole('ADMIN') or hasRole('GESTIONNAIRE')")
+    public ResponseEntity<Page<ColisResponseDTO>> searchAllColis(
+            @RequestParam(required = false) StatusColis statut,
+            @RequestParam(required = false) PriorityColis priorite,
+            @RequestParam(required = false) String ville,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String trackingCode,
+            @RequestParam(required = false) String expediteurId,
+            @PageableDefault(size = 20, sort = "dateCreation", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<ColisResponseDTO> result = colisService.searchColisAdmin(
+                statut, priorite, ville, description, trackingCode, expediteurId, pageable
+        );
         return ResponseEntity.ok(result);
     }
 
+    // ========================================================================
+    // 3. ESPACE LIVREUR
+    // ========================================================================
 
-    @GetMapping("/suivi/{trackingCode}")
-    public ResponseEntity<ColisResponseDTO> suivreLeColis(@PathVariable String trackingCode) {
-        log.info("Requête de suivi pour le code : {}", trackingCode);
-        ColisResponseDTO response = colisService.suivreColis(trackingCode);
-        return ResponseEntity.ok(response);
+    /**
+     * Récupérer les colis assignés au livreur connecté.
+     * Accès : Livreur uniquement.
+     */
+    @GetMapping("/mes-colis")
+    @PreAuthorize("hasAuthority('MISSION_READ')") // Utilisation de la permission spécifique du Livreur
+    public ResponseEntity<List<ColisResponseDTO>> getMesColis() {
+        List<ColisResponseDTO> mesColis = colisService.getColisForAuthenticatedLivreur();
+        return ResponseEntity.ok(mesColis != null ? mesColis : Collections.emptyList());
     }
 
-    // ... imports
+    // ========================================================================
+    // 4. PUBLIC (SANS AUTHENTIFICATION)
+    // ========================================================================
 
-    // 👇 AJOUTE CET ENDPOINT
-    @GetMapping("/mes-colis")
-    @PreAuthorize("hasAuthority('LIVREUR') or hasRole('LIVREUR')") // Sécurité renforcée
-    public ResponseEntity<List<ColisResponseDTO>> getMesColis() {
-
-        List<ColisResponseDTO> mesColis = colisService.getColisForAuthenticatedLivreur();
-        if (mesColis == null) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-        return ResponseEntity.ok(mesColis);
+    /**
+     * Suivi public d'un colis via son code de tracking.
+     * Accès : Public (Pas de @PreAuthorize).
+     */
+    @GetMapping("/suivi/{trackingCode}")
+    public ResponseEntity<ColisResponseDTO> suivreLeColis(@PathVariable String trackingCode) {
+        log.info("Suivi public demandé pour le code : {}", trackingCode);
+        ColisResponseDTO response = colisService.suivreColis(trackingCode);
+        return ResponseEntity.ok(response);
     }
 }

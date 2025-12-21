@@ -12,6 +12,7 @@ import java.util.List;
 public interface PermissionMapper {
 
     // Permission -> DTO
+
     PermissionResponseDTO toResponseDTO(Permission permission);
 
     // List<Permission> -> List<DTO>

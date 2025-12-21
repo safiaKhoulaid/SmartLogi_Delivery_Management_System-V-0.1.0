@@ -27,15 +27,16 @@ public interface ColisRepository extends JpaRepository<Colis, String>, JpaSpecif
     @Query("SELECT c FROM Colis c WHERE " +
             "(:statut IS NULL OR c.statut = :statut) AND " +
             "(:priorite IS NULL OR c.priorite = :priorite) AND " +
-            // On ajoute cast(... as string) pour dire à Postgres que c'est du texte, même si c'est null
             "(:ville IS NULL OR LOWER(c.villeDestination) LIKE LOWER(CONCAT('%', cast(:ville as string), '%'))) AND " +
             "(:description IS NULL OR LOWER(c.description) LIKE LOWER(CONCAT('%', cast(:description as string), '%'))) AND " +
+            "(:trackingCode IS NULL OR LOWER(c.trackingCode) LIKE LOWER(CONCAT('%', cast(:trackingCode as string), '%'))) AND " + // 👈 AJOUT
             "(:expediteurId IS NULL OR c.clientExpediteur.id = :expediteurId)")
     Page<Colis> rechercheAvancee(
             @Param("statut") StatusColis statut,
             @Param("priorite") PriorityColis priorite,
             @Param("ville") String ville,
             @Param("description") String description,
+            @Param("trackingCode") String trackingCode, // 👈 AJOUT
             @Param("expediteurId") String expediteurId,
             Pageable pageable
     );

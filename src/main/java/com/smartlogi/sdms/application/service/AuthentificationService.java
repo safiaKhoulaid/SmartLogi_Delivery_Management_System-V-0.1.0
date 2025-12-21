@@ -6,25 +6,19 @@ import com.smartlogi.sdms.application.dto.auth.AuthentificationResponse;
 import com.smartlogi.sdms.application.dto.auth.RegisterResponse;
 import com.smartlogi.sdms.application.dto.user.UserRequestRegisterDTO;
 import com.smartlogi.sdms.domain.exception.UserAlreadyExistsException;
-import com.smartlogi.sdms.domain.model.entity.BlackListToken;
 import com.smartlogi.sdms.domain.model.entity.RefreshToken;
 import com.smartlogi.sdms.domain.model.entity.users.BaseUser;
+import com.smartlogi.sdms.domain.model.entity.users.ClientExpediteur;
 import com.smartlogi.sdms.domain.model.enums.Role;
 import com.smartlogi.sdms.domain.repository.BaseUserRepository;
-import com.smartlogi.sdms.domain.repository.BlackListTokenRepository;
-import com.smartlogi.sdms.domain.repository.RefreshTokenRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.smartlogi.sdms.domain.repository.ClientExpediteurRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,37 +30,35 @@ public class AuthentificationService {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
     private final RefreshTokenService refreshTokenService;
-    private final BlackListTokenRepository blackListTokenRepository ;
-    private final RefreshTokenRepository refreshTokenRepository ;
+    private final ClientExpediteurRepository clientExpediteurRepository;
 
 
-
+    @Transactional
     public RegisterResponse register(UserRequestRegisterDTO request) {
-        String email = request.getEmail();
-        if (baseUserRepository.existsByEmail(email)) {
-            throw new UserAlreadyExistsException("ce email déja utilise");
+
+        if (baseUserRepository.existsByEmail(request.getEmail())) {
+            throw new UserAlreadyExistsException("Cet email est déjà utilisé.");
         }
 
-        BaseUser user =
-                BaseUser.builder()
-                        .firstName(request.getPrenom())
-                        .lastName(request.getNom())
-                        .email(request.getEmail())
-                        .password(passwordEncoder.encode(request.getPassword()))
-                        .adresse(request.getAdresse())
-                        .telephone(request.getTelephone())
-                        .role(Role.USER)
-                        .build();
 
-        // 1. Récupérez l'entité sauvegardée (qui aura un ID)
-        BaseUser savedUser = baseUserRepository.save(user);
+        ClientExpediteur newClient = ClientExpediteur.builder()
+                .firstName(request.getPrenom())
+                .lastName(request.getNom())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .adresse(request.getAdresse())
+                .telephone(request.getTelephone())
+                .codeClient("CL-" + System.currentTimeMillis())
+                .role(Role.USER)
+                .build();
 
-        // 2. Passez l'entité sauvegardée au service JWT
-        String jwt = jwtService.generateToken(savedUser);
+
+        ClientExpediteur savedClient = clientExpediteurRepository.save(newClient);
+
 
         return RegisterResponse.builder()
-                .message("Inscription réussie ! Veuillez vous connecter pour accéder à votre compte.")
-                .email(savedUser.getEmail())
+                .message("Inscription réussie en tant que Client !")
+                .email(savedClient.getEmail())
                 .build();
     }
 
@@ -82,8 +74,11 @@ public class AuthentificationService {
 
         BaseUser user = baseUserRepository.findByEmail(request.getEmail())
                 .orElseThrow();
+
         String jwt = jwtService.generateToken(user);
+
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
+
         return AuthentificationResponse.builder()
                 .token(jwt)
                 .massage("Vous étés connecte par succès !")

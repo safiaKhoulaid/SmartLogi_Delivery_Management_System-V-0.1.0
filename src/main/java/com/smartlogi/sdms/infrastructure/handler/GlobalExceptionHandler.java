@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 // --- AJOUTS IMPORTANTS ---
 import org.springframework.security.authentication.BadCredentialsException;
@@ -58,7 +59,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDetails> handleAuthenticationException(Exception exception, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(),
-                "Échec de l'authentification. Veuillez vérifier vos identifiants.", // Message public
+                "Mots de passe ou email incorrect. Veuillez vérifier vos identifiants.", // Message public
                 request.getDescription(false)
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED); // Renvoie 401
@@ -107,5 +108,21 @@ public class GlobalExceptionHandler {
         ErrorDetails errorDetails =  new ErrorDetails(LocalDateTime.now() , "cette permission exists déja ! " ,request.getDescription(false) ) ;
         return new ResponseEntity<>(errorDetails ,  HttpStatus.CONFLICT) ;
     }
+
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(
+//            HttpMessageNotReadableException ex, WebRequest request) {
+//
+//        Map<String, Object> errorDetails = new HashMap<>();
+//        errorDetails.put("timestamp", LocalDateTime.now());
+//        errorDetails.put("status", HttpStatus.BAD_REQUEST.value());
+//        errorDetails.put("error", "Bad Request");
+//
+//        // Hna nwd7o bli l body naqess wla JSON ghalet
+//        errorDetails.put("message", "Le corps de la requête (Request Body) est manquant ou le JSON est mal formé.");
+//        errorDetails.put("details", request.getDescription(false));
+//
+//        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+//    }
 
 }

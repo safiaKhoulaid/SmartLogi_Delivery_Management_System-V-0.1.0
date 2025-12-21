@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 public class ColisRequestDTO {
 
     // --- Expéditeur (Obligatoire) ---
-    @NotNull(message = "L'ID de l'expéditeur est obligatoire.")
     private String expediteurId;
 
 

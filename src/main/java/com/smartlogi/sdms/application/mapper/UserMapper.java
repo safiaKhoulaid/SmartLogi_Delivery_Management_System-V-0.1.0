@@ -21,8 +21,6 @@ public interface UserMapper {
 
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "password", ignore = true)
-    @Mapping(target = "role", constant = "USER")
     @Mapping(target = "clientExpediteur", ignore = true)
     @Mapping(source = "prenom", target = "firstName")
     @Mapping(source = "nom", target = "lastName")

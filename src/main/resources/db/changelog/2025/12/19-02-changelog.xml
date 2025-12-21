@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="1766148574711-base-user-fix" author="ycode">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="base_user" columnName="telephone_code_pays"/>
+        </preConditions>
+
+        <renameColumn tableName="base_user" oldColumnName="telephone_code_pays" newColumnName="code_pays" columnDataType="VARCHAR(255)"/>
+        <renameColumn tableName="base_user" oldColumnName="telephone_numero" newColumnName="nombre" columnDataType="VARCHAR(255)"/>
+    </changeSet>
+
+    <changeSet id="1766148574711-destinataire-recreate" author="ycode">
+        <dropTable tableName="destinataire" cascadeConstraints="true"/>
+
+        <createTable tableName="destinataire">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_destinataire"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)"/>
+
+            <column name="code_pays" type="VARCHAR(255)"/>
+            <column name="nombre" type="VARCHAR(255)"/>
+
+            <column name="rue" type="VARCHAR(50)"/>
+            <column name="numero" type="VARCHAR(20)"/>
+            <column name="ville" type="VARCHAR(30)"/>
+            <column name="code_postal" type="VARCHAR(5)"/>
+            <column name="pays" type="VARCHAR(20)"/>
+            <column name="latitude" type="DOUBLE"/>
+            <column name="longitude" type="DOUBLE"/>
+
+            <column name="expediteur_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="expediteur_id"
+                                 baseTableName="destinataire"
+                                 constraintName="FK_DESTINATAIRE_ON_EXPEDITEUR"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="client_expediteur"/>
+    </changeSet>
+
+    <changeSet id="1766148574711-constraints-clean" author="ycode">
+        <delete tableName="base_user">
+            <where>password IS NULL</where>
+        </delete>
+
+        <addNotNullConstraint columnDataType="VARCHAR(255)"
+                              columnName="password"
+                              tableName="base_user"/>
+    </changeSet>
+
+</databaseChangeLog>

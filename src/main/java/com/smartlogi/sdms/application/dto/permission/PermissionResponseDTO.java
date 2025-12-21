@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class PermissionResponseDTO {
+    private String message ;
     private String id;
     private String name;
 }

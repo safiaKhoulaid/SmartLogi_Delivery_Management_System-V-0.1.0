@@ -1,21 +1,19 @@
 package com.smartlogi.sdms.application.service;
 
+import com.smartlogi.sdms.application.dto.auth.AuthentificationRequest;
+import com.smartlogi.sdms.application.dto.auth.AuthentificationResponse;
+import com.smartlogi.sdms.application.dto.auth.RegisterResponse;
 import com.smartlogi.sdms.application.dto.user.UserRequestRegisterDTO;
-import com.smartlogi.sdms.domain.model.entity.RefreshToken; // <-- Zidi had Import
+import com.smartlogi.sdms.domain.model.entity.RefreshToken;
 import com.smartlogi.sdms.domain.model.entity.users.BaseUser;
 import com.smartlogi.sdms.domain.model.enums.Role;
 import com.smartlogi.sdms.domain.model.vo.Adresse;
 import com.smartlogi.sdms.domain.model.vo.Telephone;
 import com.smartlogi.sdms.domain.repository.BaseUserRepository;
- // <-- Zidi had Import
-import com.smartlogi.sdms.application.dto.auth.AuthentificationRequest;
-import com.smartlogi.sdms.application.dto.auth.AuthentificationResponse;
-import com.smartlogi.sdms.application.dto.auth.RegisterResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,8 +22,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -142,7 +140,6 @@ class AuthentificationServiceTest {
         assertEquals(dummyJwtToken, response.getToken());
 
         // [Vérification Jdida] Wach refresh token rje3?
-
 
 
         assertEquals("refresh-token-uuid", response.getRefreshToken());

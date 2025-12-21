@@ -47,6 +47,7 @@ import java.time.LocalDateTime;
     // --- Traçabilité (Non obligatoire, mais utile pour le suivi) ---
     private String dernierStatutCommentaire;
     private LocalDateTime dateDernierStatut;
+    private String trackingCode  ;
 
 
 }
