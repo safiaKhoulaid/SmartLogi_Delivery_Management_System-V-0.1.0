@@ -322,7 +322,7 @@ mvn clean verify jacoco:report sonar:sonar \
 ### Class Diagram
 
 <!-- Embedded image: filename has spaces and parentheses, URL-encode them for reliable rendering -->
-![SDMS Class Diagram](docs/diagrams/images/sdms.drawio-1.jpg)
+![SDMS Class Diagram]([docs/diagrams/images/sdms.drawio-1.jpg](https://github.com/safiaKhoulaid/SmartLogi_Delivery_Management_System-V-0.1.0/blob/main/docs/diagrams/images/sdms.drawio%20(1).jpg))
 
 If the image does not render in your preview, open the file directly at `docs/diagrams/images/sdms.drawio (1).png`.
 
@@ -587,5 +587,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - The open-source community for various tools and libraries
 
 - Contributors and testers of the project
+
 
 
