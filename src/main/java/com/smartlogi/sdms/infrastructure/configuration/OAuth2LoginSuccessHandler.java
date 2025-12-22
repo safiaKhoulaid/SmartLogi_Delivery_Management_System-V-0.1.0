@@ -29,24 +29,21 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     private final BaseUserRepository userRepository;
 
     @Value("${application.security.oauth2.frontend-url:http://localhost:4200/login-success}")
-    private String frontendUrl; // Fin ghanseftuh f Angular
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
-        // 1. Jib l'info dyal User mn Google
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
         String firstName = oAuth2User.getAttribute("given_name");
         String lastName = oAuth2User.getAttribute("family_name");
 
-        // 2. Chuf wach had User kayn f base de données, ila la créer wahd jdid
         BaseUser user = saveOrUpdateUser(email, firstName, lastName);
 
-        // 3. Générer JWT Token bhalla rah dkhl b login/password
-        String jwtToken = jwtService.generateToken(user); // Ta2kdi anaha kat9bl User entity
+        String jwtToken = jwtService.generateToken(user);
 
         // 4. Seftih l Angular m3a Token f URL
         String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
