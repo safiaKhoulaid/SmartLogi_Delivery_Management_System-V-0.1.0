@@ -45,7 +45,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         String jwtToken = jwtService.generateToken(user);
 
-        // 4. Seftih l Angular m3a Token f URL
         String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
                 .queryParam("token", jwtToken)
                 .build().toUriString();
@@ -57,16 +56,14 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         Optional<BaseUser> existingUser = userRepository.findByEmail(email);
 
         if (existingUser.isPresent()) {
-            // Ila kan déjà kayn, ymkn t-update lih smya ila bghiti
             return existingUser.get();
         } else {
-            // Ila makanch, créer user jdid
             BaseUser newUser = BaseUser.builder()
                     .email(email)
                     .firstName(firstName)
                     .lastName(lastName)
-                    .role(Role.USER) // Awla role par défaut 3ndk
-                    .password("") // Password khawi hit jay mn Google
+                    .role(Role.USER)
+                    .password("")
                     .build();
             return userRepository.save(newUser);
         }

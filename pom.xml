@@ -5,11 +5,10 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Spring Boot parent -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>3.4.0</version>
         <relativePath/>
     </parent>
 
@@ -20,22 +19,13 @@
     <name>smarlogi-api</name>
     <description>Demo project for Spring Boot</description>
 
-    <!-- Metadata -->
-    <url/>
-    <licenses><license/></licenses>
-    <developers><developer/></developers>
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
-
-    <!-- Global Properties -->
     <properties>
         <java.version>17</java.version>
 
-        <!-- Sonar -->
+        <spring-ai.version>1.0.0-M4</spring-ai.version>
+
+        <liquibase.version>4.31.1</liquibase.version>
+
         <sonar.projectKey>sdms</sonar.projectKey>
         <sonar.projectName>SDMS</sonar.projectName>
         <sonar.host.url>http://localhost:9000</sonar.host.url>
@@ -44,14 +34,15 @@
 
     <dependencies>
 
-        <!-- ========================================= -->
-        <!-- 📌 SPRING : Web, JPA, Validation, Security -->
-        <!-- ========================================= -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -67,6 +58,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -74,157 +69,114 @@
             <scope>provided</scope>
         </dependency>
 
-
-        <!-- ======================== -->
-        <!-- 📌 BASE DE DONNÉES       -->
-        <!-- ======================== -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Liquibase -->
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.liquibase.ext</groupId>
             <artifactId>liquibase-hibernate6</artifactId>
             <version>4.25.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
 
-        <!-- ======================== -->
-        <!-- 📌 AUTHENTIFICATION/JWT   -->
-        <!-- ======================== -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.13.0</version>
         </dependency>
-
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
             <version>0.13.0</version>
         </dependency>
-
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
             <version>0.13.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-jwt</artifactId>
             <version>1.1.1.RELEASE</version>
         </dependency>
 
-
-        <!-- ======================== -->
-        <!-- 📌 DOCUMENTATION API       -->
-        <!-- ======================== -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.8.14</version>
         </dependency>
 
-
-        <!-- ======================== -->
-        <!-- 📌 TEMPLATING / EMAIL     -->
-        <!-- ======================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-
-        <!-- ======================== -->
-        <!-- 📌 LOGGING                -->
-        <!-- ======================== -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>7.4</version>
         </dependency>
 
-
-        <!-- ======================== -->
-        <!-- 📌 UTILITAIRES            -->
-        <!-- ======================== -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.18.0</version>
         </dependency>
-
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
             <version>3.0.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-core</artifactId>
         </dependency>
 
-
-        <!-- ======================== -->
-        <!-- 📌 MAPPING / LOMBOK       -->
-        <!-- ======================== -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>1.5.5.Final</version>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-
-        <!-- ======================== -->
-        <!-- 📌 MONITORING / METRICS   -->
-        <!-- ======================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
-
-        <!-- ======================== -->
-        <!-- 📌 TESTS                  -->
-        <!-- ======================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -235,39 +187,22 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
-        </dependency>
-
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
-
-            <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -282,7 +217,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Resource Plugin -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.3.1</version>
@@ -291,7 +225,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -322,24 +255,21 @@
                 </configuration>
             </plugin>
 
-            <!-- Liquibase -->
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.31.1</version>
-                <configuration>
-                    <changeLogFile>src/main/resources/db/changelog/db.changelog-master.xml</changeLogFile>
-                    <url>jdbc:postgresql://localhost:5432/smartlogi_db_v2</url>
-                    <username>postgres</username>
-                    <password>1234</password>
-                    <driver>org.postgresql.Driver</driver>
-                    <diffChangeLogFile>src/main/resources/db/changelog/db.changelog-diff.xml</diffChangeLogFile>
-                    <outputChangeLogFile>src/main/resources/db/changelog/003-generated.xml</outputChangeLogFile>
-                    <referenceUrl>hibernate:spring:com.smartlogi.sdms.domain?org.hibernate.dialect.PostgreSQLDialect</referenceUrl>
-                </configuration>
+                <version>4.31.1</version> <configuration>
+                <changeLogFile>src/main/resources/db/changelog/db.changelog-master.xml</changeLogFile>
+                <url>jdbc:postgresql://localhost:5432/smartlogi_db_v2</url>
+                <username>postgres</username>
+                <password>1234</password>
+                <driver>org.postgresql.Driver</driver>
+                <diffChangeLogFile>src/main/resources/db/changelog/db.changelog-diff.xml</diffChangeLogFile>
+                <outputChangeLogFile>src/main/resources/db/changelog/003-generated.xml</outputChangeLogFile>
+                <referenceUrl>hibernate:spring:com.smartlogi.sdms.domain?org.hibernate.dialect.PostgreSQLDialect</referenceUrl>
+            </configuration>
             </plugin>
 
-            <!-- Jacoco -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -350,8 +280,6 @@
                         <exclude>com/smartlogi/sdms/infrastructure/configuration/*</exclude>
                         <exclude>com/smartlogi/sdms/infrastructure/handler/*</exclude>
                         <exclude>com/smartlogi/sdms/application/dto/**</exclude>
-<!--                        <exclude>com/smartlogi/sdms/application/mapper/**</exclude>-->
-
                         <exclude>com/smartlogi/sdms/domain/model/entity/**</exclude>
                         <exclude>com/smartlogi/sdms/domain/model/enums/*</exclude>
                         <exclude>com/smartlogi/sdms/domain/exception/*</exclude>
@@ -370,14 +298,30 @@
                 </executions>
             </plugin>
 
-            <!-- Sonar -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>4.0.0.4121</version>
             </plugin>
-
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
 </project>

@@ -1,12 +1,10 @@
 spring:
   datasource:
-    # ⚠️ "db" howa smiyat service f docker-compose, machi "db-1"
     url: jdbc:postgresql://db:5432/smartlogi_db_v2
     username: postgres
     password: 1234
     driver-class-name: org.postgresql.Driver
 
-  # ✅ Zidi had partie d Liquibase bach maymchich l localhost
   liquibase:
     url: jdbc:postgresql://db:5432/smartlogi_db_v2
     user: postgres
@@ -15,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate # Only Liquibase manages schema
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:

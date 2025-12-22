@@ -28,7 +28,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  # 👇 HNA FIN KHASSHA TKOUN (Malignya m3a jpa, mail, etc.)
+  # Security OAuth2
   security:
     oauth2:
       client:
@@ -38,6 +38,15 @@ spring:
             client-secret: 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
             scope: openid, profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
+  ai:
+    openai:
+      api-key: sk-cf99eeeadeb349a9afb63ccef8b4fb12
+      base-url: https://api.deepseek.com
+      chat:
+        options:
+          model: deepseek-chat
+          temperature: 0.0
 
 # Configuration Swagger (Bo7dha)
 springdoc:

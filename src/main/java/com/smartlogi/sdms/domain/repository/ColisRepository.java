@@ -46,4 +46,5 @@ public interface ColisRepository extends JpaRepository<Colis, String>, JpaSpecif
     List<Colis> findAllByLivreurId(@Param("idLivreur") String idLivreur);
 
     Optional<Colis> findByTrackingCode(String trackingCode);
+
 }
