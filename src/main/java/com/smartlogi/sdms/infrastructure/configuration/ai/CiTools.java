@@ -11,23 +11,33 @@ import java.util.function.Function;
 @Configuration
 public class CiTools {
 
+    // 1. Records dyal l-Inputs (Darouri bash l-AI yfhm l-schema)
+    public record LogRequest(String path) {}
+    public record SourceCodeRequest(String fileName) {}
+
     @Bean
     @Description("Lire le fichier build.log pour voir l'erreur de compilation ou de test")
-    public Function<String, String> readBuildLog() {
-        return path -> {
+    public Function<LogRequest, String> readBuildLog() {
+        return request -> {
             try {
+                // Kan9raw dima build.log li f root
                 return Files.readString(Path.of("build.log"));
-            } catch (Exception e) { return "Erreur de lecture du log"; }
-        };
+            } catch (Exception e) {
+                return "Erreur de lecture du log : " + e.getMessage();
+            }
+        }; // 👈 Hna kan khassek had l-accolade
     }
 
     @Bean
     @Description("Lire le contenu d'un fichier source Java pour analyser le code")
-    public Function<String, String> readSourceCode() {
-        return fileName -> {
+    public Function<SourceCodeRequest, String> readSourceCode() {
+        return request -> {
             try {
-                return Files.readString(Path.of("src/main/java/" + fileName));
-            } catch (Exception e) { return "Fichier introuvable"; }
+                // Kan-accessiw l fileName mn l-object request
+                return Files.readString(Path.of("src/main/java/" + request.fileName()));
+            } catch (Exception e) {
+                return "Fichier introuvable : " + request.fileName();
+            }
         };
     }
 }
