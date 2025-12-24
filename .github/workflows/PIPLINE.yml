@@ -67,7 +67,7 @@ jobs:
       - name: Build with Maven
         run: mvn clean verify > build.log 2>&1 || true
 
-      - name: AI Fixer (ReAct Mode)
-        if: failure()
+      - name: AI Analysis (ReAct Mode)
+        if: always()
         run: |
           curl -X POST http://your-api/api/v1/ai/analyze-cicd

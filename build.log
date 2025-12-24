@@ -1,0 +1,28 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -----------------------< com.smartlogi:sdms >-----------------------
+[INFO] Building sdms 0.0.1-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-resources-plugin:3.3.1:resources (default-resources) @ sdms ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO]
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ sdms ---
+[INFO] Changes detected - recompiling the module!
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR :
+[INFO] -------------------------------------------------------------
+[ERROR] /src/main/java/com/smartlogi/sdms/application/service/ColisService.java:[45,22] error: cannot find symbol
+  symbol:   variable expediteurRepository
+  location: class com.smartlogi.sdms.application.service.ColisService
+[INFO] 1 error
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.456 s
+[INFO] Finished at: 2025-12-22T15:30:00Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project sdms: Compilation failure
+[ERROR] /src/main/java/com/smartlogi/sdms/application/service/ColisService.java:[45,22] error: cannot find symbol
+[ERROR] -> [Help 1]

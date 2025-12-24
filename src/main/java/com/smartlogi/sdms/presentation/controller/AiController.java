@@ -1,6 +1,8 @@
 package com.smartlogi.sdms.presentation.controller;
 
+import com.smartlogi.sdms.application.service.ai.CiAiService;
 import com.smartlogi.sdms.application.service.ai.LogisticsAiService;
+import com.smartlogi.sdms.infrastructure.configuration.ai.CiTools;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,7 @@ import java.util.Map;
 public class AiController {
 
     private final LogisticsAiService aiService;
+    private final CiAiService ciAiService ;
 
     @PostMapping("/chat")
     public Map<String, String> chat(@RequestBody Map<String, String> request) {
@@ -20,5 +23,11 @@ public class AiController {
         String chatId = request.getOrDefault("chatId", "default-session");
         String reponse = aiService.askAssistant(question, chatId);
         return Map.of("response", reponse);
+    }
+
+
+    @PostMapping("/analyze-cicd")
+    public String analyze() {
+        return ciAiService.solveBuildError();
     }
 }
