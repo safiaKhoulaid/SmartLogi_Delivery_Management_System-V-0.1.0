@@ -70,4 +70,4 @@ jobs:
       - name: AI Analysis (ReAct Mode)
         if: always()
         run: |
-          curl -X POST http://your-api/api/v1/ai/analyze-cicd
+          curl -X POST http://51.21.186.55:8080/api/v1/ai/analyze-cicd
