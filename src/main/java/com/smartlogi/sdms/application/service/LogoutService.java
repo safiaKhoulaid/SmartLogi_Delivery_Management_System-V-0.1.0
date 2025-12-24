@@ -2,7 +2,7 @@ package com.smartlogi.sdms.application.service;
 
 import com.smartlogi.sdms.domain.model.entity.BlackListToken;
 import com.smartlogi.sdms.domain.repository.BlackListTokenRepository;
-import com.smartlogi.sdms.domain.repository.RefreshTokenRepository; //
+import com.smartlogi.sdms.domain.repository.RefreshTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,6 @@ public class LogoutService implements LogoutHandler {
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
-        // 1. نجبدو Header
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
 
@@ -32,15 +31,11 @@ public class LogoutService implements LogoutHandler {
             return;
         }
 
-        // 2. نجبدو Token
         jwt = authHeader.substring(7);
 
-        // 3. نحرقو Access Token (Blacklist)
-        // تأكدي أن BlackListToken عندها Constructor كياخد String
         BlackListToken blackListedToken = new BlackListToken(jwt);
         blackListTokenRepository.save(blackListedToken);
 
-        // 4. نمسحو Refresh Token (ديال هاد المستخدم)
         try {
             String userEmail = jwtService.extractUserEmail(jwt);
             var storedToken = refreshTokenRepository.findByUsername(userEmail);
@@ -52,7 +47,6 @@ public class LogoutService implements LogoutHandler {
             log.error("Erreur lors du logout", e);
         }
 
-        // 5. نخويو Context
         SecurityContextHolder.clearContext();
     }
 }

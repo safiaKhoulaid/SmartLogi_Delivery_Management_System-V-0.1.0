@@ -64,3 +64,10 @@ jobs:
             sudo docker-compose pull
             sudo docker-compose up -d
           EOF
+      - name: Build with Maven
+        run: mvn clean verify > build.log 2>&1 || true
+
+      - name: AI Fixer (ReAct Mode)
+        if: failure()
+        run: |
+          curl -X POST http://your-api/api/v1/ai/analyze-cicd

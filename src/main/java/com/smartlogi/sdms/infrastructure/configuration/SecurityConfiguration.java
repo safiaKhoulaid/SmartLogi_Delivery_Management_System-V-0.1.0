@@ -34,10 +34,9 @@ public class SecurityConfiguration {
     private final LogoutService logoutService ;
     private final BlackListTokenRepository blackListTokenRepository ;
 
-    // 👇 1. Injection dyal les handlers li sawbna
-    // (Spring ghadi y-lqahom hit drti fihom @Component wla @Bean)
-    private final AuthenticationEntryPoint authEntryPoint; // L 401 (Login naqess/ghalet)
-    private final AccessDeniedHandler accessDeniedHandler; // L 403 (Role naqess)
+
+    private final AuthenticationEntryPoint authEntryPoint;
+    private final AccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public JWTAuthFilter jwtAuthFilter() {
@@ -51,7 +50,7 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Hna fin kayn OAuth2 callback
+                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(
                                 "/v1/api-docs/**",
                                 "/swagger-ui/**",
@@ -72,7 +71,7 @@ public class SecurityConfiguration {
                 )
                 .logout(logout -> logout
                 .logoutUrl("/api/v1/auth/logout")
-                .addLogoutHandler(logoutService) // ✅ هذا هو اللي كيدير Blacklist
+                .addLogoutHandler(logoutService)
                 .logoutSuccessHandler((request, response, authentication) -> {
                     SecurityContextHolder.clearContext();
                     response.setStatus(HttpServletResponse.SC_OK);
@@ -80,10 +79,8 @@ public class SecurityConfiguration {
                     response.getWriter().write("{\"message\": \"Déconnexion réussie.\"}");
                 })
         )
-             //    👇 HNA BLASSA S7I7A (Khrejna mn logout)
                 .oauth2Login(oauth2 -> oauth2
-                        //.defaultSuccessUrl("/home", true) // <-- HADI ANNULLIHA DB (choufi lteht)
-                        .successHandler(oAuth2LoginSuccessHandler) // <-- Zidi had l handler (choufi l étape jayya)
+                        .successHandler(oAuth2LoginSuccessHandler)
                 );
 
         return http.build();
