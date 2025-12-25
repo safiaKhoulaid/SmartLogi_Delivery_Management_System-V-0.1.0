@@ -19,9 +19,10 @@ public class CiAiService {
                 .build();
     }
 
-    public String solveBuildError() {
+    public String solveBuildError(String logContent) {
         return chatClient.prompt()
-                .user("Le build a échoué. Analyse le log et propose une solution.")
+                .system("Tu es un ingénieur DevOps. Analyse le contenu du build.log fourni par l'utilisateur et propose une solution.")
+                .user("Voici le contenu du fichier build.log : \n" + logContent)
                 .call()
                 .content();
     }
