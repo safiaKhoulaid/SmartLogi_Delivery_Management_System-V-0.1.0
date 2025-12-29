@@ -38,23 +38,17 @@ pipeline {
         }
 
         stage('4. Deployment (CD)') {
-            steps {
-                // هاد المرحلة كادير نفس خدمة scp و ssh لي فـ GitHub Actions
-                sshagent([SSH_KEY_ID]) {
-                    // 1. صيفطي docker-compose لـ سيرفر الـ App
-                    sh "scp -o StrictHostKeyChecking=no docker-compose.yml ${EC2_USER}@${EC2_IP}:/home/${EC2_USER}/"
+                    steps {
+                        sshagent([SSH_KEY_ID]) {
+                            // 1. صيفطي docker-compose لـ سيرفر الـ App
+                            sh "scp -o StrictHostKeyChecking=no docker-compose.yml ${EC2_USER}@${EC2_IP}:/home/${EC2_USER}/"
 
-                    // 2. تخدمي docker-compose فـ السيرفر
-                    sh """
-                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} << 'EOF'
-                        cd /home/${EC2_USER}/
-                        sudo docker-compose down
-                        sudo docker-compose pull
-                        sudo docker-compose up -d
-                    EOF
-                    """
-                }
-            }
+                            // 2. تنفيذ الأوامر (طريقة السطر الواحد أحسن وأضمن)
+                            sh """
+                            ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} "cd /home/${EC2_USER}/ && sudo docker-compose down && sudo docker-compose pull && sudo docker-compose up -d"
+                            """
+                        }
+                    }
         }
 
         stage('5. AI Analysis (ReAct)') {
