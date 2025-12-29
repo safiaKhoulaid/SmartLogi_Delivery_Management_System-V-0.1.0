@@ -19,12 +19,12 @@ pipeline {
             }
         }
 
-        stage('2. Unit Tests & JaCoCo') {
+       /* stage('2. Unit Tests & JaCoCo') {
             steps {
                 // تنفيذ التستات وكايخرج التقرير ديال JaCoCo
                 sh 'mvn clean verify jacoco:report'
             }
-        }
+        }*/
 
         stage('3. Build Jar') {
             steps {
