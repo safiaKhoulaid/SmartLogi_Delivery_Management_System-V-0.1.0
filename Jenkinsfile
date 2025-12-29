@@ -7,59 +7,70 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = "safiakhoulaid/sdms-backend"
-        DOCKER_CREDS = 'docker-hub-creds' // الـ ID ديال الـ Credentials فـ Jenkins
+        // السوارت لي خاص تزيديهم فـ Jenkins Credentials
+        DOCKER_IMAGE = "safiakhoulaid/smartlogi-backend"
+        DOCKER_CREDS = 'docker-hub-creds'
+        SSH_KEY_ID   = 'ec2-ssh-key' // ID ديال الـ .pem فـ Jenkins
+        EC2_USER     = 'ec2-user'
+        EC2_IP       = '51.21.186.55' // IP ديال سيرفر الـ App
     }
 
     stages {
-        stage('1. Checkout Code') {
+        stage('1. Checkout') {
+            steps { checkout scm }
+        }
+
+        stage('2. Build Jar') {
             steps {
-                // كايجيب الكود من GitHub
-                checkout scm
+                sh './mvnw clean package -DskipTests'
             }
         }
 
-       /* stage('2. Unit Tests & JaCoCo') {
-            steps {
-                // تنفيذ التستات وكايخرج التقرير ديال JaCoCo
-                sh 'mvn clean verify jacoco:report'
-            }
-        }*/
-
-        stage('3. Build Jar') {
-            steps {
-                // كايصاوب الـ JAR اللي غايتحط فـ Docker Image
-                sh 'mvn package -DskipTests'
-            }
-        }
-
-        stage('4. Docker Build & Tag') {
+        stage('3. Docker Build & Push') {
             steps {
                 script {
-                    // بناء الـ Image باستعمال الـ Dockerfile ديالك
-                    sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
-                    sh "docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest"
-                }
-            }
-        }
-
-        stage('5. Docker Push') {
-            steps {
-                script {
-                    // كايصيفط الـ Image لـ Docker Hub
                     docker.withRegistry('', DOCKER_CREDS) {
-                        sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
-                        sh "docker push ${DOCKER_IMAGE}:latest"
+                        def app = docker.build("${DOCKER_IMAGE}:latest")
+                        app.push()
                     }
                 }
             }
         }
-    }
 
-    post {
-        always {
-            // كاينقي الـ Workspace مورا ما يسالي
-            cleanWs()
+        stage('4. Deployment (CD)') {
+            steps {
+                // هاد المرحلة كادير نفس خدمة scp و ssh لي فـ GitHub Actions
+                sshagent([SSH_KEY_ID]) {
+                    // 1. صيفطي docker-compose لـ سيرفر الـ App
+                    sh "scp -o StrictHostKeyChecking=no docker-compose.yml ${EC2_USER}@${EC2_IP}:/home/${EC2_USER}/"
+
+                    // 2. تخدمي docker-compose فـ السيرفر
+                    sh """
+                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} << 'EOF'
+                        cd /home/${EC2_USER}/
+                        sudo docker-compose down
+                        sudo docker-compose pull
+                        sudo docker-compose up -d
+                    EOF
+                    """
+                }
+            }
+        }
+
+        stage('5. AI Analysis (ReAct)') {
+            steps {
+                script {
+                    // تشغيل التستات وحفظ الـ Log
+                    sh 'mvn clean verify > build.log 2>&1 || true'
+
+                    // صيفطي الـ Log لـ AI API ديالك
+                    sh """
+                    curl -X POST http://51.21.186.55:8080/api/v1/ai/analyze-cicd \
+                         -H "Content-Type: text/plain" \
+                         --data-binary "@build.log"
+                    """
+                }
+            }
         }
     }
 }
