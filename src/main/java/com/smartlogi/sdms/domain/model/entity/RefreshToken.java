@@ -19,7 +19,7 @@ public class RefreshToken {
     @Id
     private String id;
 
-    @Indexed // Hadi bach t-9llbi b username
+    @Indexed
     private String username;
 
 

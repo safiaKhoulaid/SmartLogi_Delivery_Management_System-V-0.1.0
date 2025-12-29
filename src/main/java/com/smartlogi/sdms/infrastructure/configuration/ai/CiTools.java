@@ -11,7 +11,6 @@ import java.util.function.Function;
 @Configuration
 public class CiTools {
 
-    // 1. Records dyal l-Inputs (Darouri bash l-AI yfhm l-schema)
     public record LogRequest(String path) {}
     public record SourceCodeRequest(String fileName) {}
 
@@ -20,12 +19,11 @@ public class CiTools {
     public Function<LogRequest, String> readBuildLog() {
         return request -> {
             try {
-                // Kan9raw dima build.log li f root
                 return Files.readString(Path.of("build.log"));
             } catch (Exception e) {
                 return "Erreur de lecture du log : " + e.getMessage();
             }
-        }; // 👈 Hna kan khassek had l-accolade
+        };
     }
 
     @Bean
@@ -33,7 +31,6 @@ public class CiTools {
     public Function<SourceCodeRequest, String> readSourceCode() {
         return request -> {
             try {
-                // Kan-accessiw l fileName mn l-object request
                 return Files.readString(Path.of("src/main/java/" + request.fileName()));
             } catch (Exception e) {
                 return "Fichier introuvable : " + request.fileName();

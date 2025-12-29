@@ -1,5 +1,6 @@
 package com.smartlogi.sdms.domain.model.entity.users;
 
+import com.smartlogi.sdms.domain.model.enums.AuthProvider;
 import com.smartlogi.sdms.domain.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,7 +40,10 @@ public class BaseUser extends PersonInfo implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider = AuthProvider.LOCAL; // par défaut LOCAL
 
+    private String providerId;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -62,7 +66,7 @@ public class BaseUser extends PersonInfo implements UserDetails {
     @Override
     public boolean isEnabled() { return true; }
 
-    // Equals & HashCode (مهمين بزاف مع Hibernate)
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

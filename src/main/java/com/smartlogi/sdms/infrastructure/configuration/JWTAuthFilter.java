@@ -49,7 +49,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             userEmail = jwtService.extractUserEmail(jwt);
             if (blackListTokenRepository.existsById(jwt)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return; // 🛑 Stop l-filter hna
+                return;
             }
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);

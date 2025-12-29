@@ -30,14 +30,26 @@ spring:
 
   # Security OAuth2
   security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: 61172088660-h3c3gutkcb3nj04n2l6o07afqs77p9a2.apps.googleusercontent.com
+#            client-secret: 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
+#            scope: openid, profile, email
+#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
     oauth2:
       client:
         registration:
-          google:
-            client-id: 61172088660-h3c3gutkcb3nj04n2l6o07afqs77p9a2.apps.googleusercontent.com
-            client-secret: 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
+          okta:
+            client-id: X9Yzl0yQuLeYsW1mFtrnXLP5IGYbw9AU
+            client-secret: Txtu16by0cofZuF1K0ztonNeVBri-CyGPyW-rpZfcqjyXhEacXj7lQ5__HvrihqG
             scope: openid, profile, email
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          okta:
+            issuer-uri: https://dev-tsljattis1gpus20.us.auth0.com/
+
+
 
   ai:
     openai:

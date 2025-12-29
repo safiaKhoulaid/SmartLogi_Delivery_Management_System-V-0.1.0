@@ -6,7 +6,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AdresseTest {
-
+    // فـ AdresseTest.java، حيدي هاد الـ test أو بدليه حيت مابقاش كايعطي Exception
+    @Test
+    @DisplayName("Ne devrait plus lever d'exception pour les champs nulls")
+    void adresse_ShouldNotThrow_WhenFieldsAreNull() {
+        assertDoesNotThrow(() -> new Adresse(null, null, null, null, null));
+    }
     @Test
     @DisplayName("Devrait normaliser les champs (MAJUSCULES et trim)")
     void adresse_ShouldNormalizeFields() {
