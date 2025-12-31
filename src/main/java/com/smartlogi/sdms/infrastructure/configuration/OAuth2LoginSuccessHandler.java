@@ -34,6 +34,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        oAuth2User.getAttributes().forEach((key, value) -> System.out.println(key + ": " + value));
         String email = oAuth2User.getAttribute("email");
         String firstName = oAuth2User.getAttribute("given_name");
         String lastName = oAuth2User.getAttribute("family_name");

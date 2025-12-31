@@ -57,7 +57,8 @@ public class SecurityConfiguration {
                                 "/swagger-ui.html",
                                 "/actuator/**",
                                 "/api/v1/colis/suivi/**",
-                                "/api/v1/ai/**"
+                                "/api/v1/ai/**",
+                                "/oauth2/authorization/auth0"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
