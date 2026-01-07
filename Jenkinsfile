@@ -1,5 +1,8 @@
 pipeline {
     agent any
+	triggers {
+		githubPush()
+	}
 
     tools {
         maven 'Maven3'
@@ -7,12 +10,12 @@ pipeline {
     }
 
     environment {
-        // السوارت لي خاص تزيديهم فـ Jenkins Credentials
+
         DOCKER_IMAGE = "safiakhoulaid/smartlogi-backend"
         DOCKER_CREDS = 'docker-hub-creds'
-        SSH_KEY_ID   = 'ec2-ssh-key' // ID ديال الـ .pem فـ Jenkins
+        SSH_KEY_ID   = 'ec2-ssh-key'
         EC2_USER     = 'ec2-user'
-        EC2_IP       = '51.21.186.55' // IP ديال سيرفر الـ App
+        EC2_IP       = '51.21.186.55'
     }
 
     stages {
@@ -40,10 +43,8 @@ pipeline {
         stage('4. Deployment (CD)') {
                     steps {
                         sshagent([SSH_KEY_ID]) {
-                            // 1. صيفطي docker-compose لـ سيرفر الـ App
                             sh "scp -o StrictHostKeyChecking=no docker-compose.yml ${EC2_USER}@${EC2_IP}:/home/${EC2_USER}/"
 
-                            // 2. تنفيذ الأوامر (طريقة السطر الواحد أحسن وأضمن)
                             sh """
                             ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} "cd /home/${EC2_USER}/ && sudo docker-compose down && sudo docker-compose pull && sudo docker-compose up -d"
                             """
@@ -54,10 +55,8 @@ pipeline {
         stage('5. AI Analysis (ReAct)') {
             steps {
                 script {
-                    // تشغيل التستات وحفظ الـ Log
                     sh 'mvn clean verify > build.log 2>&1 || true'
 
-                    // صيفطي الـ Log لـ AI API ديالك
                     sh """
                     curl -X POST http://51.21.186.55:8080/api/v1/ai/analyze-cicd \
                          -H "Content-Type: text/plain" \
