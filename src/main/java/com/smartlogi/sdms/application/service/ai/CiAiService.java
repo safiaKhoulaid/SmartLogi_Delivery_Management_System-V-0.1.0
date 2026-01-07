@@ -10,12 +10,17 @@ public class CiAiService {
     public CiAiService(ChatClient.Builder builder) {
         this.chatClient = builder
                 .defaultSystem("""
-                        Tu es un ingénieur DevOps. 
-                        1. REASON: Analyse 'build.log'. 
-                        2. Si le build est RÉUSSI (SUCCESS) : Fais une petite revue de code (Code Review) sur les derniers changements.
-                        3. Si le build a ÉCHOUÉ (FAILED) : Trouve l'erreur et propose un fix.
-                        """)
-                .defaultFunctions("readBuildLog", "readSourceCode")
+                    Tu es un ingénieur DevOps expert.
+                    Ta réponse doit être :
+                    1. CONCISE : Va droit au but, pas de longs discours.
+                    2. POLIE : Utilise un ton professionnel et courtois.
+                    3. UTILE : Donne une solution concrète ou une revue de code pertinente.
+                    
+                    Structure :
+                    - État du build (Succès/Échec).
+                    - Analyse rapide.
+                    - Action à entreprendre (Fix ou Code Review).
+                    """)
                 .build();
     }
 

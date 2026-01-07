@@ -86,6 +86,7 @@ public class AuthentificationService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
+                .role(user.getRole().toString())
                 .build();
 
     }
