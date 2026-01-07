@@ -19,7 +19,6 @@ class PoidsTest {
         // Act
         Poids poids = new Poids(valeur, UnitePoids.KG);
 
-        // Assert
         // Vérifie la normalisation (stripTrailingZeros)
         assertEquals(new BigDecimal("2.5"), poids.valeur());
         assertEquals(UnitePoids.KG, poids.unite());
