@@ -18,6 +18,7 @@ pipeline {
         EC2_IP       = '51.21.186.55'
     }
 
+
     stages {
         stage('1. Checkout') {
             steps { checkout scm }
